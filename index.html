@@ -3,17 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>Badminton Tournament Lottery</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-
 body{
     min-height:100vh;
     background-image:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg");
     background-size:cover;
     background-position:center;
 }
-
 .overlay{
     min-height:100vh;
     background:rgba(0,0,0,0.78);
@@ -21,10 +18,8 @@ body{
     padding:20px;
     text-align:center;
 }
-
 h1{margin-bottom:10px}
 h2{color:#ffcc00;margin:10px 0}
-
 .team-inputs{
     max-width:900px;
     margin:15px auto;
@@ -32,13 +27,11 @@ h2{color:#ffcc00;margin:10px 0}
     grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
     gap:8px;
 }
-
 .team-inputs input{
     padding:8px;
     border-radius:6px;
     border:none;
 }
-
 button{
     padding:12px 30px;
     font-size:17px;
@@ -49,7 +42,6 @@ button{
     margin:10px;
 }
 button:disabled{background:#aaa}
-
 .groups,.matches{
     display:flex;
     gap:20px;
@@ -57,14 +49,12 @@ button:disabled{background:#aaa}
     flex-wrap:wrap;
     margin-top:15px;
 }
-
 .group,.match-box{
     width:260px;
     background:rgba(255,255,255,0.12);
     padding:15px;
     border-radius:12px;
 }
-
 ul{list-style:none}
 li{
     padding:6px 0;
@@ -82,7 +72,6 @@ li{
     justify-content:center;
     z-index:999;
 }
-
 .court{
     width:80%;
     height:120px;
@@ -92,21 +81,18 @@ li{
     overflow:hidden;
     margin-bottom:20px;
 }
-
 .shuttle{
     position:absolute;
     font-size:48px;
     top:30px;
     animation:fly 1.2s linear infinite alternate;
 }
-
 @keyframes fly{
     0%{left:0%;transform:rotate(-20deg)}
     100%{left:90%;transform:rotate(20deg)}
 }
 </style>
 </head>
-
 <body>
 
 <div class="overlay">
@@ -115,10 +101,9 @@ li{
 
 <div class="team-inputs" id="teamInputs"></div>
 
-<button id="drawBtn" onclick="startDraw()">Draw Groups</button>
-<button id="matchBtn" onclick="generateGroupMatches()" disabled>
-    Generate Group Matches
-</button>
+<button onclick="startDraw()">Draw Groups</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>Generate Group Matches</button>
+<button id="nextRoundBtn" onclick="generateNextRound()" disabled>Generate Next Round</button>
 
 <div class="groups">
     <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
@@ -127,26 +112,31 @@ li{
 </div>
 
 <h2>🏸 Group Match Fixtures</h2>
-
 <div class="matches">
     <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
     <div class="match-box"><h2>Group B</h2><ul id="matchB"></ul></div>
     <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
 </div>
+
+<h2>🏆 Next Round Fixtures (Top 4)</h2>
+<div class="matches">
+    <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
+    <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
+    <div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
+</div>
 </div>
 
-<!-- LOADING SCREEN -->
+<!-- Loader -->
 <div class="loader" id="loader">
-    <div class="court">
-        <div class="shuttle">🏸</div>
-    </div>
+    <div class="court"><div class="shuttle">🏸</div></div>
     <h2>Drawing Groups...</h2>
 </div>
 
 <script>
-const teamInputs=document.getElementById("teamInputs");
-const loader=document.getElementById("loader");
-const matchBtn=document.getElementById("matchBtn");
+const teamInputs = document.getElementById("teamInputs");
+const loader = document.getElementById("loader");
+const matchBtn = document.getElementById("matchBtn");
+const nextRoundBtn = document.getElementById("nextRoundBtn");
 
 for(let i=1;i<=24;i++){
     const input=document.createElement("input");
@@ -161,61 +151,31 @@ function shuffle(arr){
     }
 }
 
-function getPrefix(name){
-    return name.trim().split(/\s+/).slice(0,2).join(" ").toLowerCase();
-}
-
 function startDraw(){
     const inputs=document.querySelectorAll(".team-inputs input");
     let teams=[];
-    inputs.forEach(i=>{if(i.value.trim())teams.push(i.value.trim())});
-
+    inputs.forEach(i=>{ if(i.value.trim()) teams.push(i.value.trim()) });
     if(teams.length!==24){
         alert("Please enter all 24 team names");
         return;
     }
-
     loader.style.display="flex";
-    matchBtn.disabled=true;
-
     setTimeout(()=>{
         drawGroups(teams);
         loader.style.display="none";
-    },6000);
+    },4000);
 }
 
 function drawGroups(teams){
     shuffle(teams);
-    let prefixMap={},groups={A:[],B:[],C:[]};
-    let order=["A","B","C"],idx=0;
-
-    teams.forEach(t=>{
-        let k=getPrefix(t);
-        if(!prefixMap[k])prefixMap[k]=[];
-        prefixMap[k].push(t);
+    window.finalGroups = {A:[],B:[],C:[]};
+    teams.forEach((t,i)=>{
+        const g = i%3===0?"A":i%3===1?"B":"C";
+        finalGroups[g].push(t);
     });
-
-    for(let list of Object.values(prefixMap)){
-        shuffle(list);
-        for(let t of list){
-            for(let i=0;i<3;i++){
-                let g=order[(idx+i)%3];
-                let count=groups[g].filter(x=>getPrefix(x)===getPrefix(t)).length;
-                if(groups[g].length<8 && count<2){
-                    groups[g].push(t);
-                    idx++;
-                    break;
-                }
-            }
-        }
-    }
-
-    window.finalGroups=groups;
-
-    showGroup("groupA",groups.A);
-    showGroup("groupB",groups.B);
-    showGroup("groupC",groups.C);
-
+    showGroup("groupA",finalGroups.A);
+    showGroup("groupB",finalGroups.B);
+    showGroup("groupC",finalGroups.C);
     matchBtn.disabled=false;
 }
 
@@ -233,6 +193,7 @@ function generateGroupMatches(){
     createMatches("matchA",finalGroups.A);
     createMatches("matchB",finalGroups.B);
     createMatches("matchC",finalGroups.C);
+    nextRoundBtn.disabled=false;
 }
 
 function createMatches(id,list){
@@ -240,12 +201,34 @@ function createMatches(id,list){
     ul.innerHTML="";
     let temp=[...list];
     shuffle(temp);
-
     for(let i=0;i<temp.length;i+=2){
         const li=document.createElement("li");
-        li.textContent=temp[i]+" 🆚 "+temp[i+1];
+        li.textContent = temp[i]+" 🆚 "+temp[i+1];
         ul.appendChild(li);
     }
+}
+
+/* NEXT ROUND LOGIC */
+function generateNextRound(){
+    generateGroupNext("nextA", finalGroups.A);
+    generateGroupNext("nextB", finalGroups.B);
+    generateGroupNext("nextC", finalGroups.C);
+}
+
+function generateGroupNext(id, groupTeams){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    let winners = groupTeams.slice(0,4); // top 4
+    shuffle(winners);
+    const pairs = [
+        [winners[0], winners[2]],
+        [winners[1], winners[3]]
+    ];
+    pairs.forEach(p=>{
+        const li=document.createElement("li");
+        li.textContent = p[0]+" 🆚 "+p[1];
+        ul.appendChild(li);
+    });
 }
 </script>
 
