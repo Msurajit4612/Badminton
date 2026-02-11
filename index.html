@@ -102,8 +102,12 @@ li{
 <div class="team-inputs" id="teamInputs"></div>
 
 <button onclick="startDraw()">Draw Groups</button>
-<button id="matchBtn" onclick="generateGroupMatches()" disabled>Generate Group Matches</button>
-<button id="nextRoundBtn" onclick="generateNextRound()" disabled>Generate Next Round</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>
+    Generate Group Matches
+</button>
+<button id="nextRoundBtn" onclick="generateNextRound()" disabled>
+    Generate Next Round
+</button>
 
 <div class="groups">
     <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
@@ -118,7 +122,7 @@ li{
     <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
 </div>
 
-<h2>🏆 Next Round Fixtures (Top 4)</h2>
+<h2>🏆 Next Round Fixtures</h2>
 <div class="matches">
     <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
     <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
@@ -128,7 +132,9 @@ li{
 
 <!-- Loader -->
 <div class="loader" id="loader">
-    <div class="court"><div class="shuttle">🏸</div></div>
+    <div class="court">
+        <div class="shuttle">🏸</div>
+    </div>
     <h2>Drawing Groups...</h2>
 </div>
 
@@ -138,12 +144,14 @@ const loader = document.getElementById("loader");
 const matchBtn = document.getElementById("matchBtn");
 const nextRoundBtn = document.getElementById("nextRoundBtn");
 
+/* Create inputs */
 for(let i=1;i<=24;i++){
     const input=document.createElement("input");
     input.placeholder="Team "+i;
     teamInputs.appendChild(input);
 }
 
+/* Shuffle utility */
 function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
         const j=Math.floor(Math.random()*(i+1));
@@ -151,10 +159,13 @@ function shuffle(arr){
     }
 }
 
+/* Draw groups */
 function startDraw(){
     const inputs=document.querySelectorAll(".team-inputs input");
     let teams=[];
-    inputs.forEach(i=>{ if(i.value.trim()) teams.push(i.value.trim()) });
+    inputs.forEach(i=>{
+        if(i.value.trim()) teams.push(i.value.trim());
+    });
     if(teams.length!==24){
         alert("Please enter all 24 team names");
         return;
@@ -168,9 +179,9 @@ function startDraw(){
 
 function drawGroups(teams){
     shuffle(teams);
-    window.finalGroups = {A:[],B:[],C:[]};
+    window.finalGroups={A:[],B:[],C:[]};
     teams.forEach((t,i)=>{
-        const g = i%3===0?"A":i%3===1?"B":"C";
+        const g=i%3===0?"A":i%3===1?"B":"C";
         finalGroups[g].push(t);
     });
     showGroup("groupA",finalGroups.A);
@@ -179,6 +190,7 @@ function drawGroups(teams){
     matchBtn.disabled=false;
 }
 
+/* Show group */
 function showGroup(id,list){
     const ul=document.getElementById(id);
     ul.innerHTML="";
@@ -189,6 +201,7 @@ function showGroup(id,list){
     });
 }
 
+/* Group matches */
 function generateGroupMatches(){
     createMatches("matchA",finalGroups.A);
     createMatches("matchB",finalGroups.B);
@@ -203,30 +216,33 @@ function createMatches(id,list){
     shuffle(temp);
     for(let i=0;i<temp.length;i+=2){
         const li=document.createElement("li");
-        li.textContent = temp[i]+" 🆚 "+temp[i+1];
+        li.textContent=temp[i]+" 🆚 "+temp[i+1];
         ul.appendChild(li);
     }
 }
 
-/* NEXT ROUND LOGIC */
+/* NEXT ROUND — NO TEAM NAMES */
 function generateNextRound(){
-    generateGroupNext("nextA", finalGroups.A);
-    generateGroupNext("nextB", finalGroups.B);
-    generateGroupNext("nextC", finalGroups.C);
+    generateGroupNext("nextA");
+    generateGroupNext("nextB");
+    generateGroupNext("nextC");
 }
 
-function generateGroupNext(id, groupTeams){
+function generateGroupNext(id){
     const ul=document.getElementById(id);
     ul.innerHTML="";
-    let winners = groupTeams.slice(0,4); // top 4
+
+    let winners=["Winner 1","Winner 2","Winner 3","Winner 4"];
     shuffle(winners);
-    const pairs = [
-        [winners[0], winners[2]],
-        [winners[1], winners[3]]
+
+    const pairs=[
+        [winners[0],winners[2]],
+        [winners[1],winners[3]]
     ];
+
     pairs.forEach(p=>{
         const li=document.createElement("li");
-        li.textContent = p[0]+" 🆚 "+p[1];
+        li.textContent = `${p[0]} 🆚 ${p[1]}`;
         ul.appendChild(li);
     });
 }
