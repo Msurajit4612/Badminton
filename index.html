@@ -2,263 +2,179 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Badminton Tournament Lottery</title>
-
+<title>Tournament Generator</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{
-    min-height:100vh;
-    background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover;
-}
-.overlay{
-    min-height:100vh;
-    background:rgba(0,0,0,0.78);
-    color:white;
-    padding:20px;
-    text-align:center;
-}
-h1{margin-bottom:10px}
-h2{color:#ffcc00;margin:10px 0}
-.team-inputs{
-    max-width:900px;
-    margin:15px auto;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-    gap:8px;
-}
-.team-inputs input{
-    padding:8px;
-    border-radius:6px;
-    border:none;
-}
-button{
-    padding:12px 30px;
-    font-size:16px;
-    border:none;
-    border-radius:8px;
-    background:#ffcc00;
-    cursor:pointer;
-    margin:6px;
-}
-button:disabled{background:#aaa}
-.groups,.matches{
-    display:flex;
-    gap:20px;
-    justify-content:center;
-    flex-wrap:wrap;
-    margin-top:15px;
-}
-.group,.match-box{
-    width:260px;
-    background:rgba(255,255,255,0.12);
-    padding:15px;
-    border-radius:12px;
-}
-ul{list-style:none}
-li{
-    padding:6px 0;
-    border-bottom:1px solid rgba(255,255,255,0.25);
-}
-
-/* Loader */
-.loader{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.92);
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-}
-.shuttle{
-    font-size:48px;
-    animation:fly 1s infinite alternate;
-}
-@keyframes fly{
-    from{transform:translateX(-40px)}
-    to{transform:translateX(40px)}
-}
+    body{
+        font-family: Arial, sans-serif;
+        background:#111;
+        color:#fff;
+        text-align:center;
+    }
+    button{
+        padding:10px 18px;
+        margin:5px;
+        background:#ffb300;
+        border:none;
+        border-radius:6px;
+        font-weight:bold;
+        cursor:pointer;
+    }
+    .container{
+        display:flex;
+        justify-content:space-around;
+        flex-wrap:wrap;
+        margin-top:20px;
+    }
+    .box{
+        background:rgba(255,255,255,0.08);
+        padding:15px;
+        border-radius:10px;
+        width:280px;
+        margin:10px;
+    }
+    h3{
+        color:#ffb300;
+    }
+    ul{
+        list-style:none;
+        padding:0;
+    }
+    li{
+        margin:6px 0;
+    }
 </style>
 </head>
-
 <body>
 
-<div class="overlay">
-<h1>🏸 Badminton Tournament Fixture Lottery</h1>
+<h2>🏸 Tournament Generator</h2>
 
-<div class="team-inputs" id="teamInputs"></div>
+<button onclick="drawGroups()">Draw Groups</button>
+<button onclick="groupRound()">Group Round Matches</button>
+<button onclick="nextRound()">Next Round</button>
+<button onclick="superSix()">Super Six</button>
 
-<button onclick="startDraw()">Draw Groups</button>
-<button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Round Matches</button>
-<button id="nextBtn" onclick="generateNextRound()" disabled>Next Round</button>
-<button id="superBtn" onclick="generateSuperSix()" disabled>Super Six</button>
-
-<!-- Groups -->
-<div class="groups">
-    <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
-    <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
-    <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+<div class="container">
+    <div class="box"><h3>Group A</h3><ul id="groupA"></ul></div>
+    <div class="box"><h3>Group B</h3><ul id="groupB"></ul></div>
+    <div class="box"><h3>Group C</h3><ul id="groupC"></ul></div>
 </div>
 
-<!-- Group Matches -->
-<h2>🏸 Group Round Matches</h2>
-<div class="matches">
-    <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
-    <div class="match-box"><h2>Group B</h2><ul id="matchB"></ul></div>
-    <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
+<div class="container">
+    <div class="box"><h3>Group A – Group Round</h3><ul id="matchA"></ul></div>
+    <div class="box"><h3>Group B – Group Round</h3><ul id="matchB"></ul></div>
+    <div class="box"><h3>Group C – Group Round</h3><ul id="matchC"></ul></div>
 </div>
 
-<!-- Next Round -->
-<h2>🏆 Next Round Fixtures</h2>
-<div class="matches">
-    <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
-    <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
-    <div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
+<div class="container">
+    <div class="box"><h3>Group A – Next Round</h3><ul id="nextA"></ul></div>
+    <div class="box"><h3>Group B – Next Round</h3><ul id="nextB"></ul></div>
+    <div class="box"><h3>Group C – Next Round</h3><ul id="nextC"></ul></div>
 </div>
 
-<!-- Super Six -->
-<h2>🔥 Super Six</h2>
-<div class="matches">
-    <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
-    <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
-</div>
-</div>
-
-<!-- Loader -->
-<div class="loader" id="loader">
-    <div class="shuttle">🏸</div>
-    <p id="loaderText">Processing...</p>
+<div class="container">
+    <div class="box"><h3>🔥 Group E (Super Six)</h3><ul id="groupE"></ul></div>
+    <div class="box"><h3>🔥 Group F (Super Six)</h3><ul id="groupF"></ul></div>
 </div>
 
 <script>
-const teamInputs = document.getElementById("teamInputs");
-const loader = document.getElementById("loader");
-const loaderText = document.getElementById("loaderText");
-const matchBtn = document.getElementById("matchBtn");
-const nextBtn = document.getElementById("nextBtn");
-const superBtn = document.getElementById("superBtn");
+/* ================== DATA ================== */
+const teams = [
+ "Bbbb","Dddd","KV1","BD4","Mmmm","BD1","Eeee","Hhhh","KV3","Nnnn",
+ "BD2","Ffff","BD3","Jjjj","Oooo","GS1","GS2","Iiii","Kkkkk","Cccc"
+];
 
-let finalGroups = {A:[], B:[], C:[]};
+let groups = {A:[], B:[], C:[]};
+let groupRoundWinners = {A:[], B:[], C:[]};
 let nextRoundMatches = {A:[], B:[], C:[]};
 
-for(let i=1;i<=24;i++){
-    const input = document.createElement("input");
-    input.placeholder = "Team " + i;
-    teamInputs.appendChild(input);
-}
-
+/* ================== UTIL ================== */
 function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]] = [arr[j],arr[i]];
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
     }
 }
 
-function showLoader(text, cb){
-    loaderText.textContent = text;
-    loader.style.display = "flex";
-    setTimeout(()=>{
-        loader.style.display="none";
-        cb();
-    },1500);
-}
-
-function startDraw(){
-    let teams=[];
-    document.querySelectorAll(".team-inputs input").forEach(i=>{
-        if(i.value.trim()) teams.push(i.value.trim());
-    });
-    if(teams.length!==24){
-        alert("Please enter all 24 team names");
-        return;
-    }
-    showLoader("Drawing Groups...",()=>{
-        shuffle(teams);
-        finalGroups={A:[],B:[],C:[]};
-        teams.forEach((t,i)=>{
-            finalGroups[i%3===0?"A":i%3===1?"B":"C"].push(t);
-        });
-        showGroup("groupA",finalGroups.A);
-        showGroup("groupB",finalGroups.B);
-        showGroup("groupC",finalGroups.C);
-        matchBtn.disabled=false;
-    });
-}
-
-function showGroup(id,list){
-    const ul=document.getElementById(id);
-    ul.innerHTML="";
-    list.forEach(t=>{
-        const li=document.createElement("li");
-        li.textContent=t;
-        ul.appendChild(li);
-    });
-}
-
-function generateGroupMatches(){
-    showLoader("Generating Group Matches...",()=>{
-        createMatches("matchA",finalGroups.A);
-        createMatches("matchB",finalGroups.B);
-        createMatches("matchC",finalGroups.C);
-        nextBtn.disabled=false;
-    });
-}
-
-function createMatches(id,list){
-    let temp=[...list];
-    shuffle(temp);
-    const ul=document.getElementById(id);
-    ul.innerHTML="";
-    for(let i=0;i<temp.length;i+=2){
-        ul.innerHTML += `<li>${temp[i]} 🆚 ${temp[i+1]}</li>`;
-    }
-}
-
-function generateNextRound(){
-    showLoader("Generating Next Round...",()=>{
-        createNextRound("nextA","A");
-        createNextRound("nextB","B");
-        createNextRound("nextC","C");
-        superBtn.disabled=false;
-    });
-}
-
-function createNextRound(id, groupKey){
-    let temp=[...finalGroups[groupKey]];
+/* ================== 1️⃣ GROUP DRAW ================== */
+function drawGroups(){
+    let temp=[...teams];
     shuffle(temp);
 
-    const matches = [
-        [temp[0], temp[1]],
-        [temp[2], temp[3]]
-    ];
+    groups.A = temp.slice(0,8);
+    groups.B = temp.slice(8,16);
+    groups.C = temp.slice(16,24);
 
-    nextRoundMatches[groupKey] = matches;
+    show("groupA", groups.A);
+    show("groupB", groups.B);
+    show("groupC", groups.C);
+}
 
-    const ul=document.getElementById(id);
+/* ================== 2️⃣ GROUP ROUND ================== */
+function groupRound(){
+    createGroupRound("A", groups.A, "matchA");
+    createGroupRound("B", groups.B, "matchB");
+    createGroupRound("C", groups.C, "matchC");
+}
+
+function createGroupRound(group, teams, ulId){
+    let temp=[...teams];
+    shuffle(temp);
+
+    const ul=document.getElementById(ulId);
     ul.innerHTML="";
-    matches.forEach(m=>{
-        ul.innerHTML += `<li>${m[0]} 🆚 ${m[1]}</li>`;
+    groupRoundWinners[group]=[];
+
+    for(let i=0;i<8;i+=2){
+        const t1=temp[i];
+        const t2=temp[i+1];
+        ul.innerHTML+=`<li>${t1} 🆚 ${t2}</li>`;
+
+        const winner=Math.random()>0.5?t1:t2;
+        groupRoundWinners[group].push(winner);
+    }
+}
+
+/* ================== 3️⃣ NEXT ROUND (FIXED) ================== */
+function nextRound(){
+    ["A","B","C"].forEach(group=>{
+        let w=[...groupRoundWinners[group]];
+        shuffle(w);
+
+        const m1=[w[0],w[2]];
+        const m2=[w[1],w[3]];
+
+        nextRoundMatches[group]=[m1,m2];
+
+        const ul=document.getElementById("next"+group);
+        ul.innerHTML=`
+            <li>${m1[0]} 🆚 ${m1[1]}</li>
+            <li>${m2[0]} 🆚 ${m2[1]}</li>
+        `;
     });
 }
 
-function generateSuperSix(){
-    showLoader("Generating Super Six...",()=>{
+/* ================== 4️⃣ SUPER SIX ================== */
+function superSix(){
+    let six=[];
 
-        let superSix = [];
-
-        ["A","B","C"].forEach(g=>{
-            nextRoundMatches[g].forEach(match=>{
-                const winner = Math.random() > 0.5 ? match[0] : match[1];
-                superSix.push(winner);
-            });
+    ["A","B","C"].forEach(group=>{
+        nextRoundMatches[group].forEach(match=>{
+            const winner=Math.random()>0.5?match[0]:match[1];
+            six.push(winner);
         });
-
-        shuffle(superSix);
-
-        showGroup("groupE", superSix.slice(0,3));
-        showGroup("groupF", superSix.slice(3,6));
     });
+
+    shuffle(six);
+
+    show("groupE", six.slice(0,3));
+    show("groupF", six.slice(3,6));
+}
+
+/* ================== DISPLAY ================== */
+function show(id,arr){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    arr.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
 }
 </script>
 
