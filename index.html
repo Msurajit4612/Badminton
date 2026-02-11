@@ -46,7 +46,6 @@ h2{color:#ffcc00;margin:14px 0}
 ul{list-style:none}
 li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
 
-/* LOADER */
 .loader{
     position:fixed;inset:0;
     background:rgba(0,0,0,.9);
@@ -59,10 +58,10 @@ li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
 .shuttle{font-size:48px;animation:fly 1s infinite alternate}
 @keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 
-/* BUTTON BAR (MOVED UP) */
+/* BUTTON BAR */
 .button-bar{
     position:fixed;
-    bottom:20px; /* 👈 moved up */
+    bottom:20px;
     left:50%;
     transform:translateX(-50%);
     width:96%;
@@ -84,12 +83,8 @@ li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
     cursor:pointer;
 }
 
-.button-bar button:disabled{
-    background:#777;
-    cursor:not-allowed;
-}
+.button-bar button:disabled{background:#777}
 
-/* BLINK */
 @keyframes blink{
     0%{box-shadow:0 0 5px #ffcc00}
     50%{box-shadow:0 0 18px #ffcc00}
@@ -97,15 +92,8 @@ li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
 }
 button.active{animation:blink 1s infinite}
 
-/* MOBILE */
 @media(max-width:480px){
-    .button-bar{
-        grid-template-columns:repeat(2,1fr);
-    }
-    .button-bar button{
-        font-size:13px;
-        padding:14px 6px;
-    }
+    .button-bar{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -166,7 +154,6 @@ button.active{animation:blink 1s infinite}
 
 </div>
 
-<!-- BUTTON BAR -->
 <div class="button-bar">
   <button id="drawBtn" onclick="startDraw()">Draw Groups</button>
   <button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Matches</button>
@@ -176,13 +163,11 @@ button.active{animation:blink 1s infinite}
   <button id="finalBtn" onclick="generateFinal()" disabled>Final</button>
 </div>
 
-<!-- LOADER -->
 <div class="loader" id="loader">
   <div class="shuttle">🏸</div>
   <p id="loaderText">Processing...</p>
 </div>
 
-<!-- SOUND -->
 <audio id="btnSound">
   <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3">
 </audio>
@@ -234,6 +219,7 @@ function scrollToSection(id){
   if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
+/* ✅ UPDATED GROUP DRAW LOGIC */
 function startDraw(){
   setActive(document.getElementById("drawBtn"));
   scrollToSection("groupsSection");
@@ -243,11 +229,25 @@ function startDraw(){
   if(teams.length!==24){alert("Enter exactly 24 teams");return;}
 
   showLoader("Drawing Groups...",()=>{
-    shuffle(teams);
     groups={A:[],B:[],C:[]};
-    teams.forEach((t,i)=>{
-      groups[i%3===0?"A":i%3===1?"B":"C"].push(t);
+
+    // Group by first 2 words
+    let map={};
+    teams.forEach(t=>{
+      let key=t.split(" ").slice(0,2).join(" ").toLowerCase();
+      map[key]=map[key]||[];
+      map[key].push(t);
     });
+
+    // Distribute safely
+    Object.values(map).forEach(list=>{
+      shuffle(list);
+      list.forEach((team,i)=>{
+        const g=["A","B","C"][i%3];
+        groups[g].push(team);
+      });
+    });
+
     showList("groupA",groups.A);
     showList("groupB",groups.B);
     showList("groupC",groups.C);
@@ -280,7 +280,6 @@ function makeMatches(id,list){
   document.getElementById(id).innerHTML=html;
 }
 
-/* ✅ FIXED NEXT ROUND LOGIC */
 function generateNextRound(){
   setActive(nextBtn);
   scrollToSection("nextRoundSection");
