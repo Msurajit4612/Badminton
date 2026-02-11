@@ -6,11 +6,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{h2   min-height:100vh;
-    background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover;
-    padding-bottom:150px;
-}
-
+body{background:#111;color:#fff;min-height:100vh}
 
 .overlay{
   padding:20px;
@@ -18,7 +14,7 @@ body{h2   min-height:100vh;
   text-align:center;
 }
 
-h2{color:#ffcc00;margin:14px 0}
+h1,h2{color:#ffcc00;margin:12px 0}
 
 .team-inputs{
   max-width:900px;
@@ -71,7 +67,7 @@ button{
 }
 
 button:disabled{background:#666}
-button.active{animation:blink 1s infinite}
+button.active{animation:blink 6s infinite}
 
 @keyframes blink{
   0%{box-shadow:0 0 5px #ffcc00}
@@ -89,7 +85,7 @@ button.active{animation:blink 1s infinite}
   z-index:2000;
 }
 
-.shuttle{font-size:48px;animation:fly 6s infinite alternate}
+.shuttle{font-size:48px;animation:fly 1s infinite alternate}
 @keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
 </head>
@@ -98,8 +94,7 @@ button.active{animation:blink 1s infinite}
 
 <div class="overlay">
 <h1>KAKDWIP SHUTTLE SHOWDOWN 2026</h1>
-<h2>🏸 Tournament Lottery & Fixture</h2>
-
+<h2>Organised By - Badminton Lovers</h2> 
 <div class="team-inputs" id="teamInputs"></div>
 
 <h2 id="groupSection">Groups</h2>
