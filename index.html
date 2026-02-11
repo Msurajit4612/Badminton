@@ -17,7 +17,7 @@ body{
     padding:20px;
     text-align:center;
 }
-h2{color:#ffcc00;margin:10px 0}
+h2{color:#ffcc00;margin:14px 0}
 .team-inputs{
     max-width:900px;margin:auto;
     display:grid;
@@ -38,12 +38,12 @@ button:disabled{background:#888}
     flex-wrap:wrap;margin-top:15px
 }
 .group,.match-box{
-    width:260px;
+    width:280px;
     background:rgba(255,255,255,.12);
     padding:14px;border-radius:12px
 }
 ul{list-style:none}
-li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
+li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
 .loader{
     position:fixed;inset:0;
     background:rgba(0,0,0,.9);
@@ -68,13 +68,17 @@ li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
 <button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Matches</button>
 <button id="nextBtn" onclick="generateNextRound()" disabled>Next Round</button>
 <button id="superBtn" onclick="generateSuperSix()" disabled>Super Six</button>
+<button id="semiBtn" onclick="generateSemiFinal()" disabled>Semi Final</button>
+<button id="finalBtn" onclick="generateFinal()" disabled>Final</button>
 
+<!-- GROUPS -->
 <div class="groups">
   <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
   <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
   <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
+<!-- GROUP MATCH -->
 <h2>🏸 Group Round Matches</h2>
 <div class="matches">
   <div class="match-box"><h2>A</h2><ul id="matchA"></ul></div>
@@ -82,6 +86,7 @@ li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
   <div class="match-box"><h2>C</h2><ul id="matchC"></ul></div>
 </div>
 
+<!-- NEXT ROUND -->
 <h2>🏆 Next Round Fixtures</h2>
 <div class="matches">
   <div class="match-box"><h2>A</h2><ul id="nextA"></ul></div>
@@ -89,11 +94,34 @@ li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
   <div class="match-box"><h2>C</h2><ul id="nextC"></ul></div>
 </div>
 
+<!-- SUPER SIX -->
 <h2>🔥 Super Six</h2>
 <div class="matches">
   <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
   <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
 </div>
+
+<!-- SEMI FINAL -->
+<h2>🥇 Semi Final Fixture</h2>
+<div class="matches">
+  <div class="match-box">
+    <ul id="semiFinal">
+      <li>Group E Top 🆚 Group F 2nd</li>
+      <li>Group E 2nd 🆚 Group F Top</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FINAL -->
+<h2>🏆 Final Showdown</h2>
+<div class="matches">
+  <div class="match-box">
+    <ul id="finalMatch">
+      <li>1st Semi Final Winner 🆚 2nd Semi Final Winner</li>
+    </ul>
+  </div>
+</div>
+
 </div>
 
 <div class="loader" id="loader">
@@ -108,6 +136,8 @@ const loaderText=document.getElementById("loaderText");
 const matchBtn=document.getElementById("matchBtn");
 const nextBtn=document.getElementById("nextBtn");
 const superBtn=document.getElementById("superBtn");
+const semiBtn=document.getElementById("semiBtn");
+const finalBtn=document.getElementById("finalBtn");
 
 let finalGroups={A:[],B:[],C:[]};
 
@@ -127,7 +157,7 @@ function shuffle(arr){
 function showLoader(text,cb){
   loaderText.textContent=text;
   loader.style.display="flex";
-  setTimeout(()=>{loader.style.display="none";cb();},1200);
+  setTimeout(()=>{loader.style.display="none";cb();},1000);
 }
 
 function startDraw(){
@@ -164,18 +194,15 @@ function generateGroupMatches(){
 }
 
 function makeMatches(id,list){
-  let t=[...list];
-  shuffle(t);
+  let t=[...list]; shuffle(t);
   let ul=document.getElementById(id);
   ul.innerHTML="";
-  for(let i=0;i<t.length;i+=2){
+  for(let i=0;i<t.length;i+=2)
     ul.innerHTML+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
-  }
 }
 
-/* ✅ NEXT ROUND — RANDOM PAIRING */
 function generateNextRound(){
-  showLoader("Next Round Fixtures...",()=>{
+  showLoader("Next Round...",()=>{
     randomNext("nextA");
     randomNext("nextB");
     randomNext("nextC");
@@ -184,33 +211,36 @@ function generateNextRound(){
 }
 
 function randomNext(id){
-  let winners=["Winner 1","Winner 2","Winner 3","Winner 4"];
-  shuffle(winners);
-
-  let ul=document.getElementById(id);
-  ul.innerHTML=`
-    <li>${winners[0]} 🆚 ${winners[1]}</li>
-    <li>${winners[2]} 🆚 ${winners[3]}</li>
-  `;
+  let w=["Winner 1","Winner 2","Winner 3","Winner 4"];
+  shuffle(w);
+  document.getElementById(id).innerHTML=`
+    <li>${w[0]} 🆚 ${w[1]}</li>
+    <li>${w[2]} 🆚 ${w[3]}</li>`;
 }
 
-/* SUPER SIX */
 function generateSuperSix(){
   showLoader("Super Six...",()=>{
-    let superSixTeams=[
-      "Group A 1st Winner",
-      "Group A 2nd Winner",
-      "Group B 1st Winner",
-      "Group B 2nd Winner",
-      "Group C 1st Winner",
-      "Group C 2nd Winner"
+    let six=[
+      "Group A 1st Winner","Group A 2nd Winner",
+      "Group B 1st Winner","Group B 2nd Winner",
+      "Group C 1st Winner","Group C 2nd Winner"
     ];
-
-    shuffle(superSixTeams);
-
-    showGroup("groupE",superSixTeams.slice(0,3));
-    showGroup("groupF",superSixTeams.slice(3,6));
+    shuffle(six);
+    showGroup("groupE",six.slice(0,3));
+    showGroup("groupF",six.slice(3,6));
+    semiBtn.disabled=false;
   });
+}
+
+function generateSemiFinal(){
+  showLoader("Semi Final...",()=>{
+    semiBtn.disabled=true;
+    finalBtn.disabled=false;
+  });
+}
+
+function generateFinal(){
+  showLoader("Final Showdown...",()=>{});
 }
 </script>
 </body>
