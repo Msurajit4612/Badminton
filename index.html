@@ -110,7 +110,6 @@ const nextBtn=document.getElementById("nextBtn");
 const superBtn=document.getElementById("superBtn");
 
 let finalGroups={A:[],B:[],C:[]};
-let nextRoundTeams={A:[],B:[],C:[]};
 
 for(let i=1;i<=24;i++){
   let input=document.createElement("input");
@@ -118,15 +117,15 @@ for(let i=1;i<=24;i++){
   teamInputs.appendChild(input);
 }
 
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
     let j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+    [arr[i],arr[j]]=[arr[j],arr[i]];
   }
 }
 
-function showLoader(t,cb){
-  loaderText.textContent=t;
+function showLoader(text,cb){
+  loaderText.textContent=text;
   loader.style.display="flex";
   setTimeout(()=>{loader.style.display="none";cb();},1200);
 }
@@ -135,10 +134,13 @@ function startDraw(){
   let teams=[];
   document.querySelectorAll("input").forEach(i=>i.value&&teams.push(i.value));
   if(teams.length!==24){alert("Enter 24 teams");return;}
+
   showLoader("Drawing Groups...",()=>{
     shuffle(teams);
     finalGroups={A:[],B:[],C:[]};
-    teams.forEach((t,i)=>finalGroups[i%3===0?"A":i%3===1?"B":"C"].push(t));
+    teams.forEach((t,i)=>{
+      finalGroups[i%3===0?"A":i%3===1?"B":"C"].push(t);
+    });
     showGroup("groupA",finalGroups.A);
     showGroup("groupB",finalGroups.B);
     showGroup("groupC",finalGroups.C);
@@ -147,7 +149,7 @@ function startDraw(){
 }
 
 function showGroup(id,list){
-  let ul=document.getElementById(id); 
+  let ul=document.getElementById(id);
   ul.innerHTML="";
   list.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
 }
@@ -162,47 +164,52 @@ function generateGroupMatches(){
 }
 
 function makeMatches(id,list){
-  let t=[...list]; shuffle(t);
-  let ul=document.getElementById(id); ul.innerHTML="";
-  for(let i=0;i<t.length;i+=2)
+  let t=[...list];
+  shuffle(t);
+  let ul=document.getElementById(id);
+  ul.innerHTML="";
+  for(let i=0;i<t.length;i+=2){
     ul.innerHTML+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
+  }
 }
 
-/* ✅ NEXT ROUND — ONLY WINNER LABELS */
+/* ✅ NEXT ROUND — RANDOM PAIRING */
 function generateNextRound(){
   showLoader("Next Round Fixtures...",()=>{
-    createNextRoundFixtures("nextA","A");
-    createNextRoundFixtures("nextB","B");
-    createNextRoundFixtures("nextC","C");
+    randomNext("nextA");
+    randomNext("nextB");
+    randomNext("nextC");
     superBtn.disabled=false;
   });
 }
 
-function createNextRoundFixtures(id,group){
+function randomNext(id){
+  let winners=["Winner 1","Winner 2","Winner 3","Winner 4"];
+  shuffle(winners);
+
   let ul=document.getElementById(id);
   ul.innerHTML=`
-    <li>Winner 1 🆚 Winner 4</li>
-    <li>Winner 2 🆚 Winner 3</li>
+    <li>${winners[0]} 🆚 ${winners[1]}</li>
+    <li>${winners[2]} 🆚 ${winners[3]}</li>
   `;
-
-  nextRoundTeams[group]=[
-    "Winner 1",
-    "Winner 2",
-    "Winner 3",
-    "Winner 4"
-  ];
 }
 
+/* SUPER SIX */
 function generateSuperSix(){
   showLoader("Super Six...",()=>{
-    let six=[
-      ...nextRoundTeams.A,
-      ...nextRoundTeams.B,
-      ...nextRoundTeams.C
+    let superSixTeams=[
+      "Group A 1st Winner",
+      "Group A 2nd Winner",
+      "Group B 1st Winner",
+      "Group B 2nd Winner",
+      "Group C 1st Winner",
+      "Group C 2nd Winner"
     ];
-    shuffle(six);
-    showGroup("groupE",six.slice(0,3));
-    showGroup("groupF",six.slice(3,6));
+
+    shuffle(superSixTeams);
+
+    showGroup("groupE",superSixTeams.slice(0,3));
+    showGroup("groupF",superSixTeams.slice(3,6));
   });
 }
 </script>
