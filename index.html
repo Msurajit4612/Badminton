@@ -4,163 +4,166 @@
 <meta charset="UTF-8">
 <title>KAKDWIP SHUTTLE SHOWDOWN 2026</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 
 body{
-    min-height:100vh;
-    background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover;
-    padding-bottom:150px;
+  min-height:100vh;
+  background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover fixed;
 }
 
 .overlay{
-    min-height:100vh;
-    background:rgba(0,0,0,.78);
-    color:#fff;
-    padding:20px;
-    text-align:center;
+  min-height:100vh;
+  background:rgba(0,0,0,0.78);
+  color:#fff;
+  padding:16px 12px 130px;
+  text-align:center;
 }
 
-h2{color:#ffcc00;margin:14px 0}
+h1,h2{margin:10px 0}
+h2{color:#ffcc00}
 
 .team-inputs{
-    max-width:900px;margin:auto;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:8px;
+  max-width:900px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:8px;
 }
-.team-inputs input{padding:8px;border-radius:6px;border:none}
+
+.team-inputs input{
+  padding:10px;
+  border-radius:6px;
+  border:none;
+}
 
 .groups,.matches{
-    display:flex;gap:20px;
-    justify-content:center;
-    flex-wrap:wrap;margin-top:15px
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:15px;
 }
 
 .group,.match-box{
-    width:280px;
-    background:rgba(255,255,255,.12);
-    padding:14px;border-radius:12px
+  width:280px;
+  background:rgba(255,255,255,.12);
+  padding:14px;
+  border-radius:14px;
 }
 
 ul{list-style:none}
-li{padding:8px;border-bottom:1px solid rgba(255,255,255,.25)}
-
-.loader{
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.9);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    z-index:999
+li{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,.25);
 }
-.shuttle{font-size:48px;animation:fly 6s infinite alternate}
-@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 
 /* BUTTON BAR */
 .button-bar{
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:96%;
-    background:rgba(0,0,0,.95);
-    padding:12px 8px;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-    border-radius:14px;
-    z-index:1000;
+  position:fixed;
+  bottom:20px;
+  left:0;
+  right:0;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  background:rgba(0,0,0,.85);
+  padding:10px;
+  z-index:999;
 }
 
-.button-bar button{
-    padding:14px 8px;
-    font-size:14px;
-    border:none;
-    border-radius:10px;
-    background:#ffcc00;
-    cursor:pointer;
+button{
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  background:#ffcc00;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-.button-bar button:disabled{background:#777}
+button:disabled{
+  background:#777;
+  cursor:not-allowed;
+}
+
+button.active{
+  animation:blink 1s infinite;
+}
 
 @keyframes blink{
-    0%{box-shadow:0 0 5px #ffcc00}
-    50%{box-shadow:0 0 18px #ffcc00}
-    100%{box-shadow:0 0 5px #ffcc00}
+  0%,100%{box-shadow:0 0 6px #ffcc00}
+  50%{box-shadow:0 0 16px #ffcc00}
 }
-button.active{animation:blink 1s infinite}
 
-@media(max-width:480px){
-    .button-bar{grid-template-columns:repeat(2,1fr)}
+/* LOADER */
+.loader{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:2000;
 }
+
+.shuttle{font-size:48px;animation:fly 1s infinite alternate}
+@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
 </head>
 
 <body>
 
+<audio id="beep">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3">
+</audio>
+
 <div class="overlay">
 
 <h1>KAKDWIP SHUTTLE SHOWDOWN 2026</h1>
-<h2>Organised By - Badminton Lovers</h2>
+<h2>Organised By – Badminton Lovers</h2>
 
 <div class="team-inputs" id="teamInputs"></div>
 
+<h2 id="sec-groups">🏸 Groups</h2>
 <div class="groups">
-  <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
-  <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
-  <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+  <div class="group"><h2>A</h2><ul id="groupA"></ul></div>
+  <div class="group"><h2>B</h2><ul id="groupB"></ul></div>
+  <div class="group"><h2>C</h2><ul id="groupC"></ul></div>
 </div>
 
-<h2 id="groupsSection">🏸 Group Round Matches</h2>
+<h2 id="sec-groupmatch">🏸 Group Matches</h2>
 <div class="matches">
   <div class="match-box"><h2>A</h2><ul id="matchA"></ul></div>
   <div class="match-box"><h2>B</h2><ul id="matchB"></ul></div>
   <div class="match-box"><h2>C</h2><ul id="matchC"></ul></div>
 </div>
 
-<h2 id="nextRoundSection">🏆 Next Round</h2>
+<h2 id="sec-next">🏆 Next Round</h2>
 <div class="matches">
   <div class="match-box"><h2>A</h2><ul id="nextA"></ul></div>
   <div class="match-box"><h2>B</h2><ul id="nextB"></ul></div>
   <div class="match-box"><h2>C</h2><ul id="nextC"></ul></div>
 </div>
 
-<h2 id="superSixSection">🔥 Super Six</h2>
+<h2 id="sec-super">🔥 Super Six</h2>
 <div class="matches">
   <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
   <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
 </div>
 
-<h2 id="semiFinalSection">🥇 Semi Final</h2>
-<div class="matches">
-  <div class="match-box">
-    <ul>
-      <li>Group E Top 🆚 Group F 2nd</li>
-      <li>Group F Top 🆚 Group E 2nd</li>
-    </ul>
-  </div>
 </div>
 
-<h2 id="finalSection">🏆 Final</h2>
-<div class="matches">
-  <div class="match-box">
-    <ul>
-      <li>Semi Final 1 Winner 🆚 Semi Final 2 Winner</li>
-    </ul>
-  </div>
-</div>
-
-</div>
-
+<!-- BUTTON BAR -->
 <div class="button-bar">
-  <button id="drawBtn" onclick="startDraw()">Draw Groups</button>
-  <button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Matches</button>
-  <button id="nextBtn" onclick="generateNextRound()" disabled>Next Round</button>
-  <button id="superBtn" onclick="generateSuperSix()" disabled>Super Six</button>
-  <button id="semiBtn" onclick="generateSemiFinal()" disabled>Semi Final</button>
-  <button id="finalBtn" onclick="generateFinal()" disabled>Final</button>
+  <button onclick="startDraw(this)">Draw Groups</button>
+  <button onclick="groupMatches(this)" disabled>Group Matches</button>
+  <button onclick="nextRound(this)" disabled>Next Round</button>
+  <button onclick="superSix(this)" disabled>Super Six</button>
+  <button onclick="exportPDF()">Export PDF</button>
 </div>
 
 <div class="loader" id="loader">
@@ -168,138 +171,119 @@ button.active{animation:blink 1s infinite}
   <p id="loaderText">Processing...</p>
 </div>
 
-<audio id="btnSound">
-  <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3">
-</audio>
-
 <script>
 const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
 const loaderText=document.getElementById("loaderText");
-
-const matchBtn=document.getElementById("matchBtn");
-const nextBtn=document.getElementById("nextBtn");
-const superBtn=document.getElementById("superBtn");
-const semiBtn=document.getElementById("semiBtn");
-const finalBtn=document.getElementById("finalBtn");
+const beep=document.getElementById("beep");
 
 let groups={A:[],B:[],C:[]};
 
 for(let i=1;i<=24;i++){
-  const input=document.createElement("input");
+  let input=document.createElement("input");
   input.placeholder="Team "+i;
   teamInputs.appendChild(input);
 }
 
 function shuffle(arr){
   for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
+    let j=Math.floor(Math.random()*(i+1));
     [arr[i],arr[j]]=[arr[j],arr[i]];
   }
+}
+
+function activate(btn,sec){
+  document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  beep.play();
+  document.getElementById(sec)?.scrollIntoView({behavior:"smooth"});
 }
 
 function showLoader(text,cb){
   loaderText.textContent=text;
   loader.style.display="flex";
-  setTimeout(()=>{loader.style.display="none";cb();},900);
+  setTimeout(()=>{loader.style.display="none";cb();},800);
 }
 
-function setActive(btn){
-  document.querySelectorAll(".button-bar button").forEach(b=>b.classList.remove("active"));
-  if(btn){
-    btn.classList.add("active");
-    const s=document.getElementById("btnSound");
-    s.currentTime=0;
-    s.play().catch(()=>{});
-  }
-}
-
-function scrollToSection(id){
-  const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-/* ✅ UPDATED GROUP DRAW LOGIC */
-function startDraw(){
-  setActive(document.getElementById("drawBtn"));
-  scrollToSection("groupsSection");
-
+/* 🔥 UPDATED GROUP DRAW LOGIC */
+function startDraw(btn){
   let teams=[];
-  document.querySelectorAll("input").forEach(i=>i.value&&teams.push(i.value));
-  if(teams.length!==24){alert("Enter exactly 24 teams");return;}
+  document.querySelectorAll("input").forEach(i=>{
+    if(i.value.trim()) teams.push(i.value.trim());
+  });
+
+  if(teams.length!==24){
+    alert("Enter exactly 24 teams");
+    return;
+  }
 
   showLoader("Drawing Groups...",()=>{
     groups={A:[],B:[],C:[]};
 
-    // Group by first 2 words
     let map={};
     teams.forEach(t=>{
       let key=t.split(" ").slice(0,2).join(" ").toLowerCase();
-      map[key]=map[key]||[];
+      if(!map[key]) map[key]=[];
       map[key].push(t);
     });
 
-    // Distribute safely
     Object.values(map).forEach(list=>{
       shuffle(list);
+      let order=["A","B","C"];
+      shuffle(order);
+
       list.forEach((team,i)=>{
-        const g=["A","B","C"][i%3];
+        let g;
+        if(list.length<=3){
+          g=order[i];
+        }else{
+          g=i<3?order[i]:order[Math.floor(Math.random()*3)];
+        }
         groups[g].push(team);
       });
     });
 
-    showList("groupA",groups.A);
-    showList("groupB",groups.B);
-    showList("groupC",groups.C);
-    matchBtn.disabled=false;
+    ["A","B","C"].forEach(g=>{
+      document.getElementById("group"+g).innerHTML=
+        groups[g].map(t=>`<li>${t}</li>`).join("");
+    });
+
+    document.querySelectorAll(".button-bar button")[1].disabled=false;
+    activate(btn,"sec-groups");
   });
 }
 
-function showList(id,list){
-  document.getElementById(id).innerHTML=list.map(t=>`<li>${t}</li>`).join("");
-}
-
-function generateGroupMatches(){
-  setActive(matchBtn);
-  scrollToSection("groupsSection");
-
+function groupMatches(btn){
   showLoader("Group Matches...",()=>{
-    makeMatches("matchA",groups.A);
-    makeMatches("matchB",groups.B);
-    makeMatches("matchC",groups.C);
-    nextBtn.disabled=false;
+    ["A","B","C"].forEach(g=>{
+      let t=[...groups[g]];
+      shuffle(t);
+      document.getElementById("match"+g).innerHTML=
+        `<li>${t[0]} 🆚 ${t[1]}</li>
+         <li>${t[2]} 🆚 ${t[3]}</li>
+         <li>${t[4]} 🆚 ${t[5]}</li>
+         <li>${t[6]} 🆚 ${t[7]}</li>`;
+    });
+    document.querySelectorAll(".button-bar button")[2].disabled=false;
+    activate(btn,"sec-groupmatch");
   });
 }
 
-function makeMatches(id,list){
-  let t=[...list]; shuffle(t);
-  let html="";
-  for(let i=0;i<8;i+=2){
-    html+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
-  }
-  document.getElementById(id).innerHTML=html;
-}
-
-function generateNextRound(){
-  setActive(nextBtn);
-  scrollToSection("nextRoundSection");
-
+function nextRound(btn){
   showLoader("Next Round...",()=>{
     ["A","B","C"].forEach(g=>{
       let w=["Winner 1","Winner 2","Winner 3","Winner 4"];
       shuffle(w);
-      document.getElementById("next"+g).innerHTML=`
-        <li>${w[0]} 🆚 ${w[3]}</li>
-        <li>${w[1]} 🆚 ${w[2]}</li>`;
+      document.getElementById("next"+g).innerHTML=
+        `<li>${w[0]} 🆚 ${w[3]}</li>
+         <li>${w[1]} 🆚 ${w[2]}</li>`;
     });
-    superBtn.disabled=false;
+    document.querySelectorAll(".button-bar button")[3].disabled=false;
+    activate(btn,"sec-next");
   });
 }
 
-function generateSuperSix(){
-  setActive(superBtn);
-  scrollToSection("superSixSection");
-
+function superSix(btn){
   showLoader("Super Six...",()=>{
     let six=[
       "Group A 1st","Group A 2nd",
@@ -307,21 +291,17 @@ function generateSuperSix(){
       "Group C 1st","Group C 2nd"
     ];
     shuffle(six);
-    showList("groupE",six.slice(0,3));
-    showList("groupF",six.slice(3));
-    semiBtn.disabled=false;
+    document.getElementById("groupE").innerHTML=six.slice(0,3).map(t=>`<li>${t}</li>`).join("");
+    document.getElementById("groupF").innerHTML=six.slice(3).map(t=>`<li>${t}</li>`).join("");
+    activate(btn,"sec-super");
   });
 }
 
-function generateSemiFinal(){
-  setActive(semiBtn);
-  scrollToSection("semiFinalSection");
-  finalBtn.disabled=false;
-}
-
-function generateFinal(){
-  setActive(finalBtn);
-  scrollToSection("finalSection");
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  const pdf=new jsPDF();
+  pdf.text(document.body.innerText,10,10);
+  pdf.save("Badminton_Fixture.pdf");
 }
 </script>
 
