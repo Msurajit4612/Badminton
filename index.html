@@ -6,95 +6,100 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+
 body{
     min-height:100vh;
     background-image:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg");
     background-size:cover;
     background-position:center;
 }
+
 .overlay{
     min-height:100vh;
-    background:rgba(0,0,0,0.75);
+    background:rgba(0,0,0,0.78);
+    color:white;
     padding:20px;
     text-align:center;
-    color:white;
 }
+
 h1{margin-bottom:10px}
+h2{color:#ffcc00;margin:10px 0}
 
 .team-inputs{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:8px;
-    max-width:800px;
+    max-width:900px;
     margin:15px auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:8px;
 }
+
 .team-inputs input{
     padding:8px;
     border-radius:6px;
     border:none;
 }
+
 button{
     padding:12px 30px;
-    font-size:18px;
-    border-radius:8px;
+    font-size:17px;
     border:none;
+    border-radius:8px;
     background:#ffcc00;
     cursor:pointer;
-    margin:15px 0;
+    margin:10px;
 }
 button:disabled{background:#aaa}
 
 .groups,.matches{
     display:flex;
-    justify-content:center;
     gap:20px;
+    justify-content:center;
     flex-wrap:wrap;
+    margin-top:15px;
 }
 
 .group,.match-box{
-    background:rgba(255,255,255,0.12);
     width:260px;
+    background:rgba(255,255,255,0.12);
     padding:15px;
     border-radius:12px;
 }
 
-.group h2,.match-box h2{
-    color:#ffcc00;
-    margin-bottom:8px;
-}
-
 ul{list-style:none}
 li{
-    padding:5px 0;
+    padding:6px 0;
     border-bottom:1px solid rgba(255,255,255,0.25);
 }
 
 /* Loader */
-.loader-overlay{
+.loader{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.9);
+    background:rgba(0,0,0,0.92);
     display:none;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     z-index:999;
 }
+
 .court{
     width:80%;
     height:120px;
-    border-top:3px solid #fff;
-    border-bottom:3px solid #fff;
+    border-top:3px solid white;
+    border-bottom:3px solid white;
     position:relative;
     overflow:hidden;
     margin-bottom:20px;
 }
+
 .shuttle{
     position:absolute;
     font-size:48px;
     top:30px;
     animation:fly 1.2s linear infinite alternate;
 }
+
 @keyframes fly{
     0%{left:0%;transform:rotate(-20deg)}
     100%{left:90%;transform:rotate(20deg)}
@@ -105,11 +110,15 @@ li{
 <body>
 
 <div class="overlay">
-<h1>🏸 Badminton Tournament Fixture Lottery 🏆</h1>
+<h1>🏸 Badminton Tournament Fixture Lottery</h1>
 <p>Enter 24 Team Names</p>
 
 <div class="team-inputs" id="teamInputs"></div>
+
 <button id="drawBtn" onclick="startDraw()">Draw Groups</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>
+    Generate Group Matches
+</button>
 
 <div class="groups">
     <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
@@ -117,7 +126,8 @@ li{
     <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
-<h2 style="margin:25px 0;color:#ffcc00">🏸 Group Matches</h2>
+<h2>🏸 Group Match Fixtures</h2>
+
 <div class="matches">
     <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
     <div class="match-box"><h2>Group B</h2><ul id="matchB"></ul></div>
@@ -125,21 +135,23 @@ li{
 </div>
 </div>
 
-<!-- Loader -->
-<div class="loader-overlay" id="loader">
-    <div class="court"><div class="shuttle">🏸</div></div>
-    <div>Drawing Groups...</div>
+<!-- LOADING SCREEN -->
+<div class="loader" id="loader">
+    <div class="court">
+        <div class="shuttle">🏸</div>
+    </div>
+    <h2>Drawing Groups...</h2>
 </div>
 
 <script>
-const teamInputsDiv=document.getElementById("teamInputs");
+const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
-const drawBtn=document.getElementById("drawBtn");
+const matchBtn=document.getElementById("matchBtn");
 
 for(let i=1;i<=24;i++){
     const input=document.createElement("input");
     input.placeholder="Team "+i;
-    teamInputsDiv.appendChild(input);
+    teamInputs.appendChild(input);
 }
 
 function shuffle(arr){
@@ -163,24 +175,22 @@ function startDraw(){
         return;
     }
 
-    drawBtn.disabled=true;
     loader.style.display="flex";
+    matchBtn.disabled=true;
 
     setTimeout(()=>{
-        drawLottery(teams);
+        drawGroups(teams);
         loader.style.display="none";
-        drawBtn.disabled=false;
     },6000);
 }
 
-function drawLottery(teams){
+function drawGroups(teams){
     shuffle(teams);
-
     let prefixMap={},groups={A:[],B:[],C:[]};
     let order=["A","B","C"],idx=0;
 
     teams.forEach(t=>{
-        const k=getPrefix(t);
+        let k=getPrefix(t);
         if(!prefixMap[k])prefixMap[k]=[];
         prefixMap[k].push(t);
     });
@@ -200,33 +210,16 @@ function drawLottery(teams){
         }
     }
 
-    show("groupA",groups.A);
-    show("groupB",groups.B);
-    show("groupC",groups.C);
+    window.finalGroups=groups;
 
-    generateMatches(groups);
+    showGroup("groupA",groups.A);
+    showGroup("groupB",groups.B);
+    showGroup("groupC",groups.C);
+
+    matchBtn.disabled=false;
 }
 
-function generateMatches(groups){
-    createMatches("matchA",groups.A);
-    createMatches("matchB",groups.B);
-    createMatches("matchC",groups.C);
-}
-
-function createMatches(id,list){
-    const ul=document.getElementById(id);
-    ul.innerHTML="";
-    let temp=[...list];
-    shuffle(temp); // Random pairing
-
-    for(let i=0;i<temp.length;i+=2){
-        const li=document.createElement("li");
-        li.textContent=temp[i]+"  🆚  "+temp[i+1];
-        ul.appendChild(li);
-    }
-}
-
-function show(id,list){
+function showGroup(id,list){
     const ul=document.getElementById(id);
     ul.innerHTML="";
     list.forEach(t=>{
@@ -234,6 +227,25 @@ function show(id,list){
         li.textContent=t;
         ul.appendChild(li);
     });
+}
+
+function generateGroupMatches(){
+    createMatches("matchA",finalGroups.A);
+    createMatches("matchB",finalGroups.B);
+    createMatches("matchC",finalGroups.C);
+}
+
+function createMatches(id,list){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    let temp=[...list];
+    shuffle(temp);
+
+    for(let i=0;i<temp.length;i+=2){
+        const li=document.createElement("li");
+        li.textContent=temp[i]+" 🆚 "+temp[i+1];
+        ul.appendChild(li);
+    }
 }
 </script>
 
