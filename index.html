@@ -4,78 +4,91 @@
 <meta charset="UTF-8">
 <title>KAKDWIP SHUTTLE SHOWDOWN 2026</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{
   min-height:100vh;
-  background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover fixed;
-}
-.overlay{
-  min-height:100vh;
-  background:rgba(0,0,0,.78);
+  background:#111;
   color:#fff;
-  padding:16px 12px 140px;
+}
+
+.overlay{
+  padding-bottom:140px;
+  padding-top:20px;
   text-align:center;
 }
-h1,h2{margin:10px 0}
-h2{color:#ffcc00}
+
+h1{color:#ffcc00;margin:10px 0}
+h2{margin:15px 0;color:#ffcc00}
+
 .team-inputs{
   max-width:900px;
   margin:auto;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:8px;
 }
 .team-inputs input{
-  padding:10px;
+  padding:8px;
   border-radius:6px;
   border:none;
 }
-.groups{
+
+.groups,.matches{
   display:flex;
-  gap:16px;
+  gap:15px;
   justify-content:center;
   flex-wrap:wrap;
-  margin-top:15px;
 }
-.group{
+
+.group,.match-box{
   width:280px;
   background:rgba(255,255,255,.12);
   padding:14px;
-  border-radius:14px;
+  border-radius:12px;
 }
+
 ul{list-style:none}
-li{
-  padding:8px;
-  border-bottom:1px solid rgba(255,255,255,.25);
-}
+li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
+
 .button-bar{
   position:fixed;
-  bottom:20px;
+  bottom:30px;
   left:0;
-  right:0;
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  background:rgba(0,0,0,.85);
+  width:100%;
+  background:#000;
   padding:10px;
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  flex-wrap:wrap;
   z-index:999;
 }
+
 button{
   padding:10px 16px;
   border:none;
-  border-radius:8px;
+  border-radius:20px;
   background:#ffcc00;
   cursor:pointer;
   font-weight:bold;
 }
-button.active{animation:blink 1s infinite}
-@keyframes blink{
-  0%,100%{box-shadow:0 0 6px #ffcc00}
-  50%{box-shadow:0 0 16px #ffcc00}
+
+button:disabled{
+  background:#666;
+  cursor:not-allowed;
 }
+
+button.active{
+  animation:blink 1s infinite;
+}
+
+@keyframes blink{
+  0%{box-shadow:0 0 5px #ffcc00}
+  50%{box-shadow:0 0 20px #ffcc00}
+  100%{box-shadow:0 0 5px #ffcc00}
+}
+
 .loader{
   position:fixed;
   inset:0;
@@ -86,6 +99,8 @@ button.active{animation:blink 1s infinite}
   flex-direction:column;
   z-index:2000;
 }
+.shuttle{font-size:48px;animation:fly 1s infinite alternate}
+@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
 </head>
 
@@ -94,35 +109,71 @@ button.active{animation:blink 1s infinite}
 <div class="overlay">
 
 <h1>KAKDWIP SHUTTLE SHOWDOWN 2026</h1>
-<h2>Organised By – Badminton Lovers</h2>
+<h2>🏸 Tournament Lottery & Fixture</h2>
 
 <div class="team-inputs" id="teamInputs"></div>
 
-<h2>🏸 Groups</h2>
+<!-- GROUPS -->
+<h2 id="groupSection">Groups</h2>
 <div class="groups">
-  <div class="group"><h2>A</h2><ul id="groupA"></ul></div>
-  <div class="group"><h2>B</h2><ul id="groupB"></ul></div>
-  <div class="group"><h2>C</h2><ul id="groupC"></ul></div>
+  <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
+  <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
+  <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+</div>
+
+<!-- MATCHES -->
+<h2 id="matchSection">🏸 Group Matches</h2>
+<div class="matches">
+  <div class="match-box"><h2>A</h2><ul id="matchA"></ul></div>
+  <div class="match-box"><h2>B</h2><ul id="matchB"></ul></div>
+  <div class="match-box"><h2>C</h2><ul id="matchC"></ul></div>
+</div>
+
+<h2 id="nextSection">🏆 Next Round</h2>
+<div class="matches">
+  <div class="match-box"><h2>A</h2><ul id="nextA"></ul></div>
+  <div class="match-box"><h2>B</h2><ul id="nextB"></ul></div>
+  <div class="match-box"><h2>C</h2><ul id="nextC"></ul></div>
+</div>
+
+<h2 id="superSection">🔥 Super Six</h2>
+<div class="matches">
+  <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
+  <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
 </div>
 
 </div>
 
+<!-- BUTTON BAR -->
 <div class="button-bar">
-  <button onclick="startDraw(this)">Draw Groups</button>
+  <button id="drawBtn" onclick="drawGroups()">Draw Groups</button>
+  <button id="matchBtn" onclick="groupMatches()" disabled>Group Matches</button>
+  <button id="nextBtn" onclick="nextRound()" disabled>Next Round</button>
+  <button id="superBtn" onclick="superSix()" disabled>Super Six</button>
 </div>
 
-<div class="loader" id="loader"><h2>Drawing...</h2></div>
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="shuttle">🏸</div>
+  <p id="loaderText">Processing...</p>
+</div>
 
 <script>
 const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
+const loaderText=document.getElementById("loaderText");
+
+const btns=document.querySelectorAll("button");
+const matchBtn=document.getElementById("matchBtn");
+const nextBtn=document.getElementById("nextBtn");
+const superBtn=document.getElementById("superBtn");
 
 let groups={A:[],B:[],C:[]};
 
 for(let i=1;i<=24;i++){
-  let input=document.createElement("input");
-  input.placeholder="Team "+i;
-  teamInputs.appendChild(input);
+  let inp=document.createElement("input");
+  inp.placeholder="Team "+i;
+  teamInputs.appendChild(inp);
 }
 
 function shuffle(arr){
@@ -132,85 +183,125 @@ function shuffle(arr){
   }
 }
 
-/* ✅ STRICT RULE COMPLIANT GROUP DRAW */
-function startDraw(btn){
+function showLoader(text,cb){
+  loaderText.textContent=text;
+  loader.style.display="flex";
+  setTimeout(()=>{
+    loader.style.display="none";
+    cb();
+  },900);
+}
+
+function setActive(btn){
+  btns.forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function scrollTo(id){
+  document.getElementById(id).scrollIntoView({behavior:"smooth"});
+}
+
+/* 🔥 CORE GROUP DRAW LOGIC */
+function drawGroups(){
   let teams=[];
   document.querySelectorAll("input").forEach(i=>{
     if(i.value.trim()) teams.push(i.value.trim());
   });
-  if(teams.length!==24){alert("Enter exactly 24 teams");return;}
+  if(teams.length!==24){alert("Enter 24 teams");return;}
 
-  loader.style.display="flex";
-
-  setTimeout(()=>{
+  showLoader("Drawing Groups...",()=>{
+    setActive(drawBtn);
+    scrollTo("groupSection");
 
     groups={A:[],B:[],C:[]};
-    let capacity={A:8,B:8,C:8};
 
-    /* PHASE 1: GROUP SAME-NAME TEAMS */
-    let nameMap={};
+    let map={};
     teams.forEach(t=>{
-      let key=t.split(" ").slice(0,2).join(" ").toLowerCase();
-      if(!nameMap[key]) nameMap[key]=[];
-      nameMap[key].push(t);
+      let key=t.split(" ").slice(0,2).join(" ");
+      if(!map[key]) map[key]=[];
+      map[key].push(t);
     });
 
-    let leftovers=[];
-
-    Object.values(nameMap).forEach(list=>{
+    Object.values(map).forEach(list=>{
       shuffle(list);
-      if(list.length===1){
-        leftovers.push(list[0]);
-      }else{
-        let groupOrder=["A","B","C"];
-        shuffle(groupOrder);
-
-        list.forEach((team,i)=>{
-          let g;
-          if(list.length<=3){
-            g=groupOrder[i];
-          }else{
-            g=i<3?groupOrder[i]:groupOrder[Math.floor(Math.random()*3)];
-          }
-
-          if(capacity[g]>0){
-            groups[g].push(team);
-            capacity[g]--;
-          }else{
-            leftovers.push(team);
-          }
-        });
-      }
+      let available=["A","B","C"];
+      list.forEach((team,i)=>{
+        if(available.length===0) available=["A","B","C"];
+        let g=available.splice(Math.floor(Math.random()*available.length),1)[0];
+        groups[g].push(team);
+      });
     });
 
-    /* PHASE 2: FILL REMAINING SLOTS */
-    shuffle(leftovers);
-    ["A","B","C"].forEach(g=>{
-      while(capacity[g]>0){
-        groups[g].push(leftovers.shift());
-        capacity[g]--;
-      }
+    // balance to exactly 8 per group
+    let all=[...groups.A,...groups.B,...groups.C];
+    shuffle(all);
+    groups={A:[],B:[],C:[]};
+    all.forEach((t,i)=>{
+      groups[i%3===0?"A":i%3===1?"B":"C"].push(t);
     });
 
-    /* FINAL VALIDATION */
-    if(
-      groups.A.length!==8 ||
-      groups.B.length!==8 ||
-      groups.C.length!==8
-    ){
-      alert("Draw conflict. Please redraw.");
-      return;
-    }
+    showGroup("groupA",groups.A);
+    showGroup("groupB",groups.B);
+    showGroup("groupC",groups.C);
 
-    ["A","B","C"].forEach(g=>{
-      document.getElementById("group"+g).innerHTML=
-        groups[g].map(t=>`<li>${t}</li>`).join("");
+    matchBtn.disabled=false;
+  });
+}
+
+function showGroup(id,list){
+  let ul=document.getElementById(id);
+  ul.innerHTML="";
+  list.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
+}
+
+function groupMatches(){
+  showLoader("Group Matches...",()=>{
+    setActive(matchBtn);
+    scrollTo("matchSection");
+    makeMatch("matchA",groups.A);
+    makeMatch("matchB",groups.B);
+    makeMatch("matchC",groups.C);
+    nextBtn.disabled=false;
+  });
+}
+
+function makeMatch(id,list){
+  let t=[...list]; shuffle(t);
+  let ul=document.getElementById(id);
+  ul.innerHTML="";
+  for(let i=0;i<t.length;i+=2){
+    ul.innerHTML+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
+  }
+}
+
+function nextRound(){
+  showLoader("Next Round...",()=>{
+    setActive(nextBtn);
+    scrollTo("nextSection");
+    ["nextA","nextB","nextC"].forEach(id=>{
+      let w=["Winner 1","Winner 2","Winner 3","Winner 4"];
+      shuffle(w);
+      document.getElementById(id).innerHTML=`
+        <li>${w[0]} 🆚 ${w[3]}</li>
+        <li>${w[1]} 🆚 ${w[2]}</li>`;
     });
+    superBtn.disabled=false;
+  });
+}
 
-    loader.style.display="none";
-    btn.classList.add("active");
-
-  },800);
+function superSix(){
+  showLoader("Super Six...",()=>{
+    setActive(superBtn);
+    scrollTo("superSection");
+    let six=[
+      "Group A Winner","Group A Runner",
+      "Group B Winner","Group B Runner",
+      "Group C Winner","Group C Runner"
+    ];
+    shuffle(six);
+    showGroup("groupE",six.slice(0,3));
+    showGroup("groupF",six.slice(3));
+  });
 }
 </script>
 
