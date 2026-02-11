@@ -8,23 +8,19 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-
 body{
   min-height:100vh;
   background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover fixed;
 }
-
 .overlay{
   min-height:100vh;
-  background:rgba(0,0,0,0.78);
+  background:rgba(0,0,0,.78);
   color:#fff;
-  padding:16px 12px 130px;
+  padding:16px 12px 140px;
   text-align:center;
 }
-
 h1,h2{margin:10px 0}
 h2{color:#ffcc00}
-
 .team-inputs{
   max-width:900px;
   margin:auto;
@@ -32,13 +28,11 @@ h2{color:#ffcc00}
   grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:8px;
 }
-
 .team-inputs input{
   padding:10px;
   border-radius:6px;
   border:none;
 }
-
 .groups,.matches{
   display:flex;
   gap:16px;
@@ -46,14 +40,12 @@ h2{color:#ffcc00}
   flex-wrap:wrap;
   margin-top:15px;
 }
-
 .group,.match-box{
   width:280px;
   background:rgba(255,255,255,.12);
   padding:14px;
   border-radius:14px;
 }
-
 ul{list-style:none}
 li{
   padding:8px;
@@ -74,7 +66,6 @@ li{
   padding:10px;
   z-index:999;
 }
-
 button{
   padding:10px 16px;
   border:none;
@@ -83,16 +74,8 @@ button{
   cursor:pointer;
   font-weight:bold;
 }
-
-button:disabled{
-  background:#777;
-  cursor:not-allowed;
-}
-
-button.active{
-  animation:blink 1s infinite;
-}
-
+button:disabled{background:#777}
+button.active{animation:blink 1s infinite}
 @keyframes blink{
   0%,100%{box-shadow:0 0 6px #ffcc00}
   50%{box-shadow:0 0 16px #ffcc00}
@@ -109,7 +92,6 @@ button.active{
   flex-direction:column;
   z-index:2000;
 }
-
 .shuttle{font-size:48px;animation:fly 1s infinite alternate}
 @keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
@@ -205,20 +187,17 @@ function showLoader(text,cb){
   setTimeout(()=>{loader.style.display="none";cb();},800);
 }
 
-/* 🔥 UPDATED GROUP DRAW LOGIC */
+/* 🔥 FINAL GROUP DRAW (8–8–8 GUARANTEED) */
 function startDraw(btn){
   let teams=[];
   document.querySelectorAll("input").forEach(i=>{
     if(i.value.trim()) teams.push(i.value.trim());
   });
-
-  if(teams.length!==24){
-    alert("Enter exactly 24 teams");
-    return;
-  }
+  if(teams.length!==24){alert("Enter exactly 24 teams");return;}
 
   showLoader("Drawing Groups...",()=>{
     groups={A:[],B:[],C:[]};
+    let capacity={A:8,B:8,C:8};
 
     let map={};
     teams.forEach(t=>{
@@ -229,17 +208,14 @@ function startDraw(btn){
 
     Object.values(map).forEach(list=>{
       shuffle(list);
-      let order=["A","B","C"];
+      let order=["A","B","C"].filter(g=>capacity[g]>0);
       shuffle(order);
 
-      list.forEach((team,i)=>{
-        let g;
-        if(list.length<=3){
-          g=order[i];
-        }else{
-          g=i<3?order[i]:order[Math.floor(Math.random()*3)];
-        }
+      list.forEach(team=>{
+        let possible=order.filter(g=>capacity[g]>0);
+        let g=possible[Math.floor(Math.random()*possible.length)];
         groups[g].push(team);
+        capacity[g]--;
       });
     });
 
