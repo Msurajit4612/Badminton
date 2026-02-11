@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tournament Fixture Lottery</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        min-height: 100vh;
+        background-image: url("https://images.unsplash.com/photo-1505842465776-3d90f616310d");
+        background-size: cover;
+        background-position: center;
+    }
+
+    .overlay {
+        min-height: 100vh;
+        background: rgba(0,0,0,0.75);
+        padding: 20px;
+        text-align: center;
+        color: white;
+    }
+
+    h1 {
+        margin-bottom: 15px;
+        font-size: 32px;
+    }
+
+    .team-inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        max-width: 800px;
+        margin: 0 auto 20px;
+    }
+
+    .team-inputs input {
+        padding: 8px;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+    }
+
+    button {
+        padding: 12px 30px;
+        font-size: 18px;
+        border: none;
+        border-radius: 8px;
+        background: #ffcc00;
+        color: black;
+        cursor: pointer;
+        margin-bottom: 25px;
+    }
+
+    button:hover {
+        background: #ffdd33;
+    }
+
+    .groups {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .group {
+        background: rgba(255,255,255,0.12);
+        width: 260px;
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .group h2 {
+        margin-bottom: 10px;
+        color: #ffcc00;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    li {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.25);
+    }
+</style>
+</head>
+
+<body>
+
+<div class="overlay">
+    <h1>🏆 Tournament Fixture Lottery 🏆</h1>
+
+    <h3>Enter 24 Team Names</h3>
+    <div class="team-inputs" id="teamInputs"></div>
+
+    <button onclick="drawLottery()">Draw Groups</button>
+
+    <div class="groups">
+        <div class="group">
+            <h2>Group A</h2>
+            <ul id="groupA"></ul>
+        </div>
+
+        <div class="group">
+            <h2>Group B</h2>
+            <ul id="groupB"></ul>
+        </div>
+
+        <div class="group">
+            <h2>Group C</h2>
+            <ul id="groupC"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const teamInputsDiv = document.getElementById("teamInputs");
+
+    // Create 24 input boxes
+    for (let i = 1; i <= 24; i++) {
+        const input = document.createElement("input");
+        input.placeholder = "Team " + i;
+        teamInputsDiv.appendChild(input);
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function drawLottery() {
+        const inputs = document.querySelectorAll(".team-inputs input");
+        let teams = [];
+
+        inputs.forEach(input => {
+            if (input.value.trim() !== "") {
+                teams.push(input.value.trim());
+            }
+        });
+
+        if (teams.length !== 24) {
+            alert("Please enter all 24 team names.");
+            return;
+        }
+
+        shuffle(teams);
+
+        displayGroup("groupA", teams.slice(0, 8));
+        displayGroup("groupB", teams.slice(8, 16));
+        displayGroup("groupC", teams.slice(16, 24));
+    }
+
+    function displayGroup(id, groupTeams) {
+        const ul = document.getElementById(id);
+        ul.innerHTML = "";
+        groupTeams.forEach(team => {
+            const li = document.createElement("li");
+            li.textContent = team;
+            ul.appendChild(li);
+        });
+    }
+</script>
+
+</body>
+</html>
