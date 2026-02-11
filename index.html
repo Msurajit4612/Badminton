@@ -6,7 +6,12 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#111;color:#fff;min-height:100vh}
+body{
+    min-height:100vh;
+    background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover;
+    padding-bottom:150px;
+}
+
 
 .overlay{
   padding:20px;
@@ -85,7 +90,7 @@ button.active{animation:blink 1s infinite}
   z-index:2000;
 }
 
-.shuttle{font-size:48px;animation:fly 1s infinite alternate}
+.shuttle{font-size:48px;animation:fly 6s infinite alternate}
 @keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
 </head>
