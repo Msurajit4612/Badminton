@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tournament Fixture Lottery</title>
+<title>Badminton Tournament Lottery</title>
 
 <style>
 * {
@@ -11,12 +11,14 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
+
 body {
     min-height: 100vh;
-    background-image: url("https://images.unsplash.com/photo-1505842465776-3d90f616310d");
+    background-image: url("https://images.unsplash.com/photo-1599058917212-d750089bc07e");
     background-size: cover;
     background-position: center;
 }
+
 .overlay {
     min-height: 100vh;
     background: rgba(0,0,0,0.75);
@@ -24,7 +26,9 @@ body {
     text-align: center;
     color: white;
 }
+
 h1 { margin-bottom: 10px; }
+
 .team-inputs {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
@@ -32,61 +36,131 @@ h1 { margin-bottom: 10px; }
     max-width: 800px;
     margin: 15px auto;
 }
+
 .team-inputs input {
     padding: 8px;
     border-radius: 6px;
     border: none;
 }
+
 button {
     padding: 12px 30px;
     font-size: 18px;
-    border: none;
     border-radius: 8px;
+    border: none;
     background: #ffcc00;
     cursor: pointer;
     margin: 15px 0;
 }
+
+button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
 .groups {
     display: flex;
     justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
 }
+
 .group {
     background: rgba(255,255,255,0.12);
     width: 260px;
     padding: 15px;
     border-radius: 12px;
 }
+
 .group h2 {
     color: #ffcc00;
     margin-bottom: 8px;
 }
+
 ul { list-style: none; }
 li {
     padding: 5px 0;
     border-bottom: 1px solid rgba(255,255,255,0.25);
 }
+
+/* 🏸 LOADING SCREEN */
+.loader-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.court {
+    width: 80%;
+    height: 120px;
+    border-top: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* Shuttle */
+.shuttle {
+    position: absolute;
+    font-size: 48px;
+    top: 30px;
+    animation: fly 1.2s linear infinite alternate;
+}
+
+@keyframes fly {
+    0% {
+        left: 0%;
+        transform: rotate(-20deg);
+    }
+    100% {
+        left: 90%;
+        transform: rotate(20deg);
+    }
+}
+
+.loader-text {
+    font-size: 20px;
+    letter-spacing: 1px;
+}
 </style>
 </head>
 
 <body>
+
 <div class="overlay">
-<h1>🏆 Tournament Fixture Lottery 🏆</h1>
-<p>Enter 24 Team Names</p>
+    <h1>🏸 Badminton Tournament Fixture Lottery 🏆</h1>
+    <p>Enter 24 Team Names</p>
 
-<div class="team-inputs" id="teamInputs"></div>
-<button onclick="drawLottery()">Draw Groups</button>
+    <div class="team-inputs" id="teamInputs"></div>
 
-<div class="groups">
-    <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
-    <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
-    <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+    <button id="drawBtn" onclick="startDraw()">Draw Groups</button>
+
+    <div class="groups">
+        <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
+        <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
+        <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+    </div>
 </div>
+
+<!-- 🏸 LOADER -->
+<div class="loader-overlay" id="loader">
+    <div class="court">
+        <div class="shuttle">🏸</div>
+    </div>
+    <div class="loader-text">Drawing Groups...</div>
 </div>
 
 <script>
 const teamInputsDiv = document.getElementById("teamInputs");
+const loader = document.getElementById("loader");
+const drawBtn = document.getElementById("drawBtn");
+
 for (let i = 1; i <= 24; i++) {
     const input = document.createElement("input");
     input.placeholder = "Team " + i;
@@ -104,7 +178,7 @@ function getPrefix(name) {
     return name.trim().split(/\s+/).slice(0,2).join(" ").toLowerCase();
 }
 
-function drawLottery() {
+function startDraw() {
     const inputs = document.querySelectorAll(".team-inputs input");
     let teams = [];
 
@@ -117,6 +191,17 @@ function drawLottery() {
         return;
     }
 
+    drawBtn.disabled = true;
+    loader.style.display = "flex";
+
+    setTimeout(() => {
+        drawLottery(teams);
+        loader.style.display = "none";
+        drawBtn.disabled = false;
+    }, 6000);
+}
+
+function drawLottery(teams) {
     shuffle(teams);
 
     let prefixMap = {};
@@ -127,44 +212,45 @@ function drawLottery() {
     });
 
     let groups = { A: [], B: [], C: [] };
-    let groupKeys = ["A","B","C"];
-    let groupIndex = 0;
+    let order = ["A","B","C"];
+    let idx = 0;
 
-    Object.values(prefixMap).forEach(teamList => {
-        shuffle(teamList);
-        teamList.forEach(team => {
+    for (let list of Object.values(prefixMap)) {
+        shuffle(list);
+        for (let team of list) {
             let placed = false;
             for (let i = 0; i < 3; i++) {
-                let g = groupKeys[(groupIndex + i) % 3];
-                let samePrefixCount = groups[g].filter(t => getPrefix(t) === getPrefix(team)).length;
-                if (groups[g].length < 8 && samePrefixCount < 2) {
+                let g = order[(idx + i) % 3];
+                let count = groups[g].filter(t => getPrefix(t) === getPrefix(team)).length;
+                if (groups[g].length < 8 && count < 2) {
                     groups[g].push(team);
+                    idx++;
                     placed = true;
-                    groupIndex++;
                     break;
                 }
             }
             if (!placed) {
-                alert("Unable to place teams due to rule conflict. Please try again.");
+                alert("Grouping conflict. Please redraw.");
                 return;
             }
-        });
-    });
+        }
+    }
 
-    display("groupA", groups.A);
-    display("groupB", groups.B);
-    display("groupC", groups.C);
+    show("groupA", groups.A);
+    show("groupB", groups.B);
+    show("groupC", groups.C);
 }
 
-function display(id, teams) {
+function show(id, list) {
     const ul = document.getElementById(id);
     ul.innerHTML = "";
-    teams.forEach(t => {
+    list.forEach(t => {
         const li = document.createElement("li");
         li.textContent = t;
         ul.appendChild(li);
     });
 }
 </script>
+
 </body>
 </html>
