@@ -128,7 +128,7 @@ function shuffle(a){
 function showLoader(t,cb){
   loaderText.textContent=t;
   loader.style.display="flex";
-  setTimeout(()=>{loader.style.display="none";cb();},1500);
+  setTimeout(()=>{loader.style.display="none";cb();},1200);
 }
 
 function startDraw(){
@@ -147,7 +147,8 @@ function startDraw(){
 }
 
 function showGroup(id,list){
-  let ul=document.getElementById(id); ul.innerHTML="";
+  let ul=document.getElementById(id); 
+  ul.innerHTML="";
   list.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
 }
 
@@ -167,22 +168,29 @@ function makeMatches(id,list){
     ul.innerHTML+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
 }
 
+/* ✅ NEXT ROUND — ONLY WINNER LABELS */
 function generateNextRound(){
-  showLoader("Next Round...",()=>{
-    createNext("nextA","A");
-    createNext("nextB","B");
-    createNext("nextC","C");
+  showLoader("Next Round Fixtures...",()=>{
+    createNextRoundFixtures("nextA","A");
+    createNextRoundFixtures("nextB","B");
+    createNextRoundFixtures("nextC","C");
     superBtn.disabled=false;
   });
 }
 
-function createNext(id,g){
-  let t=[...finalGroups[g]]; shuffle(t);
-  nextRoundTeams[g]=[t[0],t[1]];   // ONLY FIRST MATCH
+function createNextRoundFixtures(id,group){
   let ul=document.getElementById(id);
   ul.innerHTML=`
-    <li>${t[0]} 🆚 ${t[1]}</li>
-    <li>${t[2]} 🆚 ${t[3]}</li>`;
+    <li>Winner 1 🆚 Winner 4</li>
+    <li>Winner 2 🆚 Winner 3</li>
+  `;
+
+  nextRoundTeams[group]=[
+    "Winner 1",
+    "Winner 2",
+    "Winner 3",
+    "Winner 4"
+  ];
 }
 
 function generateSuperSix(){
