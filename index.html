@@ -104,12 +104,9 @@ li{
 <div class="team-inputs" id="teamInputs"></div>
 
 <button onclick="startDraw()">Draw Groups</button>
-<button id="matchBtn" onclick="generateGroupMatches()" disabled>
-    Generate Group Matches
-</button>
-<button id="superSixBtn" onclick="generateSuperSix()" disabled>
-    Generate Super Six
-</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Round Matches</button>
+<button id="nextRoundBtn" onclick="generateNextRound()" disabled>Next Round</button>
+<button id="superSixBtn" onclick="generateSuperSix()" disabled>Super Six</button>
 
 <!-- Groups -->
 <div class="groups">
@@ -119,11 +116,19 @@ li{
 </div>
 
 <!-- Group Matches -->
-<h2>🏸 Group Match Fixtures</h2>
+<h2>🏸 Group Round Matches</h2>
 <div class="matches">
     <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
     <div class="match-box"><h2>Group B</h2><ul id="matchB"></ul></div>
     <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
+</div>
+
+<!-- Next Round -->
+<h2>🏆 Next Round Fixtures</h2>
+<div class="matches">
+    <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
+    <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
+    <div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
 </div>
 
 <!-- Super Six -->
@@ -132,14 +137,11 @@ li{
     <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
     <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
 </div>
-
 </div>
 
 <!-- Loader -->
 <div class="loader" id="loader">
-    <div class="court">
-        <div class="shuttle">🏸</div>
-    </div>
+    <div class="court"><div class="shuttle">🏸</div></div>
     <h2 id="loaderText">Processing...</h2>
 </div>
 
@@ -148,55 +150,42 @@ const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
 const loaderText=document.getElementById("loaderText");
 const matchBtn=document.getElementById("matchBtn");
+const nextRoundBtn=document.getElementById("nextRoundBtn");
 const superSixBtn=document.getElementById("superSixBtn");
 
-/* Create Inputs */
 for(let i=1;i<=24;i++){
-    const input=document.createElement("input");
+    let input=document.createElement("input");
     input.placeholder="Team "+i;
     teamInputs.appendChild(input);
 }
 
-/* Utility */
 function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
+        let j=Math.floor(Math.random()*(i+1));
         [arr[i],arr[j]]=[arr[j],arr[i]];
     }
 }
 
-/* Loader */
-function showLoader(text, callback){
+function showLoader(text,cb){
     loaderText.textContent=text;
     loader.style.display="flex";
-    setTimeout(()=>{
-        loader.style.display="none";
-        callback();
-    },3000);
+    setTimeout(()=>{loader.style.display="none";cb();},2000);
 }
 
-/* Draw Groups */
 function startDraw(){
-    const inputs=document.querySelectorAll(".team-inputs input");
     let teams=[];
-    inputs.forEach(i=>{
+    document.querySelectorAll("input").forEach(i=>{
         if(i.value.trim()) teams.push(i.value.trim());
     });
-    if(teams.length!==24){
-        alert("Please enter all 24 team names");
-        return;
-    }
-    showLoader("Drawing Groups...",()=>{
-        drawGroups(teams);
-    });
+    if(teams.length!==24){alert("Enter all 24 teams");return;}
+    showLoader("Drawing Groups...",()=>drawGroups(teams));
 }
 
 function drawGroups(teams){
     shuffle(teams);
     window.finalGroups={A:[],B:[],C:[]};
     teams.forEach((t,i)=>{
-        const g=i%3===0?"A":i%3===1?"B":"C";
-        finalGroups[g].push(t);
+        finalGroups[i%3===0?"A":i%3===1?"B":"C"].push(t);
     });
     showGroup("groupA",finalGroups.A);
     showGroup("groupB",finalGroups.B);
@@ -204,67 +193,70 @@ function drawGroups(teams){
     matchBtn.disabled=false;
 }
 
-/* Show group */
 function showGroup(id,list){
-    const ul=document.getElementById(id);
+    let ul=document.getElementById(id);
     ul.innerHTML="";
     list.forEach(t=>{
-        const li=document.createElement("li");
+        let li=document.createElement("li");
         li.textContent=t;
         ul.appendChild(li);
     });
 }
 
-/* Group Matches */
 function generateGroupMatches(){
-    showLoader("Generating Group Matches...",()=>{
+    showLoader("Group Matches...",()=>{
         createMatches("matchA",finalGroups.A);
         createMatches("matchB",finalGroups.B);
         createMatches("matchC",finalGroups.C);
+        nextRoundBtn.disabled=false;
         superSixBtn.disabled=false;
     });
 }
 
 function createMatches(id,list){
-    const ul=document.getElementById(id);
+    let ul=document.getElementById(id);
     ul.innerHTML="";
-    let temp=[...list];
-    shuffle(temp);
-    for(let i=0;i<temp.length;i+=2){
-        const li=document.createElement("li");
-        li.textContent=temp[i]+" 🆚 "+temp[i+1];
+    let t=[...list];shuffle(t);
+    for(let i=0;i<t.length;i+=2){
+        let li=document.createElement("li");
+        li.textContent=`${t[i]} 🆚 ${t[i+1]}`;
         ul.appendChild(li);
     }
 }
 
-/* SUPER SIX LOGIC */
-function generateSuperSix(){
-    showLoader("Generating Super Six...",()=>{
-
-        let qualified = [];
-
-        qualified.push(randomMatchWinner(finalGroups.A));
-        qualified.push(randomMatchWinner(finalGroups.A));
-
-        qualified.push(randomMatchWinner(finalGroups.B));
-        qualified.push(randomMatchWinner(finalGroups.B));
-
-        qualified.push(randomMatchWinner(finalGroups.C));
-        qualified.push(randomMatchWinner(finalGroups.C));
-
-        shuffle(qualified);
-
-        showGroup("groupE", qualified.slice(0,3));
-        showGroup("groupF", qualified.slice(3,6));
+function generateNextRound(){
+    showLoader("Next Round...",()=>{
+        createNext("nextA");
+        createNext("nextB");
+        createNext("nextC");
     });
 }
 
-function randomMatchWinner(group){
-    let temp=[...group];
-    shuffle(temp);
-    const t1=temp.pop();
-    const t2=temp.pop();
-    return Math.random()>0.5?t1:t2;
+function createNext(id){
+    let ul=document.getElementById(id);
+    ul.innerHTML="";
+    let w=["Winner 1","Winner 2","Winner 3","Winner 4"];
+    shuffle(w);
+    ul.innerHTML+=`<li>${w[0]} 🆚 ${w[1]}</li>`;
+    ul.innerHTML+=`<li>${w[2]} 🆚 ${w[3]}</li>`;
+}
+
+/* Super Six */
+function generateSuperSix(){
+    showLoader("Super Six...",()=>{
+        let q=[];
+        q.push(rand(finalGroups.A)); q.push(rand(finalGroups.A));
+        q.push(rand(finalGroups.B)); q.push(rand(finalGroups.B));
+        q.push(rand(finalGroups.C)); q.push(rand(finalGroups.C));
+        shuffle(q);
+        showGroup("groupE",q.slice(0,3));
+        showGroup("groupF",q.slice(3,6));
+    });
+}
+
+function rand(g){
+    let t=[...g];shuffle(t);
+    return Math.random()>0.5?t[0]:t[1];
 }
 </script>
 
