@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Badminton Tournament Fixture</title>
+<title>Badminton Tournament Lottery</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{
@@ -11,198 +11,249 @@ body{
     background-size:cover;
     background-position:center;
 }
-
-
-.overlay{min-height:100vh;background:rgba(0,0,0,0.85);color:#fff;padding:20px;text-align:center}
+.overlay{
+    min-height:100vh;
+    background:rgba(0,0,0,0.78);
+    color:white;
+    padding:20px;
+    text-align:center;
+}
 h1{margin-bottom:10px}
-h2{color:#ffcc00;margin:12px 0}
-.team-inputs{max-width:900px;margin:15px auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
-.team-inputs input{padding:8px;border-radius:6px;border:none}
-button{padding:12px 26px;font-size:16px;border:none;border-radius:8px;background:#ffcc00;cursor:pointer;margin:6px}
-button:disabled{background:#777}
-.groups,.matches{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:15px}
-.group,.match-box{width:260px;background:rgba(255,255,255,0.12);padding:15px;border-radius:12px}
+h2{color:#ffcc00;margin:10px 0}
+.team-inputs{
+    max-width:900px;
+    margin:15px auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:8px;
+}
+.team-inputs input{
+    padding:8px;
+    border-radius:6px;
+    border:none;
+}
+button{
+    padding:12px 30px;
+    font-size:17px;
+    border:none;
+    border-radius:8px;
+    background:#ffcc00;
+    cursor:pointer;
+    margin:10px;
+}
+button:disabled{background:#aaa}
+.groups,.matches{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+.group,.match-box{
+    width:260px;
+    background:rgba(255,255,255,0.12);
+    padding:15px;
+    border-radius:12px;
+}
 ul{list-style:none}
-li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.25)}
+li{
+    padding:6px 0;
+    border-bottom:1px solid rgba(255,255,255,0.25);
+}
 
 /* Loader */
-.loader{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999}
-.court{width:80%;height:120px;border-top:3px solid white;border-bottom:3px solid white;position:relative}
-.shuttle{position:absolute;font-size:48px;top:30px;animation:fly 1.2s linear infinite alternate}
-@keyframes fly{0%{left:0%}100%{left:90%}}
+.loader{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+.court{
+    width:80%;
+    height:120px;
+    border-top:3px solid white;
+    border-bottom:3px solid white;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+.shuttle{
+    position:absolute;
+    font-size:48px;
+    top:30px;
+    animation:fly 1.2s linear infinite alternate;
+}
+@keyframes fly{
+    0%{left:0%;transform:rotate(-20deg)}
+    100%{left:90%;transform:rotate(20deg)}
+}
 </style>
 </head>
-
 <body>
-<div class="overlay">
 
-<h1>🏸 Badminton Tournament</h1>
+<div class="overlay">
+<h1>🏸 Badminton Tournament Fixture Lottery</h1>
 <p>Enter 24 Team Names</p>
 
 <div class="team-inputs" id="teamInputs"></div>
 
-<button onclick="startDraw()">Draw Round Super 24</button>
-<button id="super24MatchBtn" onclick="generateSuper24Matches()" disabled>Generate Round Super 24 Matches</button>
-<button id="super12Btn" onclick="generateSuper12()" disabled>Generate Round Super 12</button>
-<button id="super6Btn" onclick="generateSuper6()" disabled>Generate Round Super 6</button>
-<button id="semiBtn" onclick="generateSemiFinal()" disabled>Generate Semi Final</button>
-<button id="finalBtn" onclick="generateFinal()" disabled>Generate Final</button>
+<button onclick="startDraw()">Draw Groups</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>
+    Generate Group Matches
+</button>
+<button id="nextRoundBtn" onclick="generateNextRound()" disabled>
+    Generate Next Round
+</button>
 
-<h2>🏸 Round Super 24</h2>
 <div class="groups">
-<div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
-<div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
-<div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
+    <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
+    <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
+    <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
-<h2>🏆 Round Super 12</h2>
+<h2>🏸 Group Match Fixtures</h2>
 <div class="matches">
-<div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
-<div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
-<div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
+    <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
+    <div class="match-box"><h2>Group B</h2><ul id="matchB"></ul></div>
+    <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
 </div>
 
-<h2>🔥 Round Super 6</h2>
+<h2>🏆 Next Round Fixtures</h2>
 <div class="matches">
-<div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
-<div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
+    <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
+    <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
+    <div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
 </div>
-
-<h2>⚔️ Semi Final</h2>
-<div class="matches">
-<div class="match-box"><ul id="semiFinal"></ul></div>
-</div>
-
-<h2>🏆 Final</h2>
-<div class="matches">
-<div class="match-box"><ul id="finalMatch"></ul></div>
-</div>
-
 </div>
 
 <!-- Loader -->
 <div class="loader" id="loader">
-<div class="court"><div class="shuttle">🏸</div></div>
-<h2 id="loaderText">Processing...</h2>
+    <div class="court">
+        <div class="shuttle">🏸</div>
+    </div>
+    <h2 id="loaderText">Processing...</h2>
 </div>
 
 <script>
+const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
 const loaderText=document.getElementById("loaderText");
+const matchBtn=document.getElementById("matchBtn");
+const nextRoundBtn=document.getElementById("nextRoundBtn");
 
-const super24MatchBtn=document.getElementById("super24MatchBtn");
-const super12Btn=document.getElementById("super12Btn");
-const super6Btn=document.getElementById("super6Btn");
-const semiBtn=document.getElementById("semiBtn");
-const finalBtn=document.getElementById("finalBtn");
-
-const teamInputs=document.getElementById("teamInputs");
-
+/* Inputs */
 for(let i=1;i<=24;i++){
-    let input=document.createElement("input");
+    const input=document.createElement("input");
     input.placeholder="Team "+i;
     teamInputs.appendChild(input);
 }
 
+/* Utility */
 function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
-        let j=Math.floor(Math.random()*(i+1));
+        const j=Math.floor(Math.random()*(i+1));
         [arr[i],arr[j]]=[arr[j],arr[i]];
     }
 }
 
-function showLoader(text,cb){
+/* Global loader */
+function showLoader(text, callback){
     loaderText.textContent=text;
     loader.style.display="flex";
     setTimeout(()=>{
         loader.style.display="none";
-        cb();
-    },2500);
+        callback();
+    },3000);
 }
 
-function show(id,list){
-    let ul=document.getElementById(id);
+/* Draw groups */
+function startDraw(){
+    const inputs=document.querySelectorAll(".team-inputs input");
+    let teams=[];
+    inputs.forEach(i=>{
+        if(i.value.trim()) teams.push(i.value.trim());
+    });
+    if(teams.length!==24){
+        alert("Please enter all 24 team names");
+        return;
+    }
+    showLoader("Drawing Groups...",()=>{
+        drawGroups(teams);
+    });
+}
+
+function drawGroups(teams){
+    shuffle(teams);
+    window.finalGroups={A:[],B:[],C:[]};
+    teams.forEach((t,i)=>{
+        const g=i%3===0?"A":i%3===1?"B":"C";
+        finalGroups[g].push(t);
+    });
+    showGroup("groupA",finalGroups.A);
+    showGroup("groupB",finalGroups.B);
+    showGroup("groupC",finalGroups.C);
+    matchBtn.disabled=false;
+}
+
+/* Show group */
+function showGroup(id,list){
+    const ul=document.getElementById(id);
     ul.innerHTML="";
     list.forEach(t=>{
-        let li=document.createElement("li");
+        const li=document.createElement("li");
         li.textContent=t;
         ul.appendChild(li);
     });
 }
 
-/* SUPER 24 */
-function startDraw(){
-    let teams=[...document.querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean);
-    if(teams.length!==24){alert("Enter all 24 teams");return;}
-    showLoader("Drawing Round Super 24...",()=>{
-        shuffle(teams);
-        window.groups={A:[],B:[],C:[]};
-        teams.forEach((t,i)=>{
-            groups[i%3===0?"A":i%3===1?"B":"C"].push(t);
-        });
-        show("groupA",groups.A);
-        show("groupB",groups.B);
-        show("groupC",groups.C);
-        super24MatchBtn.disabled=false;
+/* Group matches */
+function generateGroupMatches(){
+    showLoader("Generating Group Matches...",()=>{
+        createMatches("matchA",finalGroups.A);
+        createMatches("matchB",finalGroups.B);
+        createMatches("matchC",finalGroups.C);
+        nextRoundBtn.disabled=false;
     });
 }
 
-function generateSuper24Matches(){
-    showLoader("Generating Matches...",()=>{
-        super12Btn.disabled=false;
+function createMatches(id,list){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    let temp=[...list];
+    shuffle(temp);
+    for(let i=0;i<temp.length;i+=2){
+        const li=document.createElement("li");
+        li.textContent=temp[i]+" 🆚 "+temp[i+1];
+        ul.appendChild(li);
+    }
+}
+
+/* Next round */
+function generateNextRound(){
+    showLoader("Generating Next Round...",()=>{
+        generateGroupNext("nextA");
+        generateGroupNext("nextB");
+        generateGroupNext("nextC");
     });
 }
 
-/* SUPER 12 */
-function generateSuper12(){
-    showLoader("Generating Round Super 12...",()=>{
-        ["nextA","nextB","nextC"].forEach(id=>{
-            let ul=document.getElementById(id);
-            ul.innerHTML="";
-            let w=["Winner 1","Winner 2","Winner 3","Winner 4"];
-            shuffle(w);
-            [[w[0],w[2]],[w[1],w[3]]].forEach(p=>{
-                let li=document.createElement("li");
-                li.textContent=`${p[0]} 🆚 ${p[1]}`;
-                ul.appendChild(li);
-            });
-        });
-        super6Btn.disabled=false;
-    });
-}
-
-/* SUPER 6 */
-function generateSuper6(){
-    showLoader("Generating Round Super 6...",()=>{
-        let winners=[
-            "Group A Match 1 Winner","Group A Match 2 Winner",
-            "Group B Match 1 Winner","Group B Match 2 Winner",
-            "Group C Match 1 Winner","Group C Match 2 Winner"
-        ];
-        shuffle(winners);
-        show("groupE",winners.slice(0,3));
-        show("groupF",winners.slice(3,6));
-        semiBtn.disabled=false;
-    });
-}
-
-/* SEMI FINAL */
-function generateSemiFinal(){
-    showLoader("Generating Semi Final...",()=>{
-        show("semiFinal",[
-            "Group E Top 🆚 Group F 2nd",
-            "Group F Top 🆚 Group E 2nd"
-        ]);
-        finalBtn.disabled=false;
-    });
-}
-
-/* FINAL */
-function generateFinal(){
-    showLoader("Generating Final...",()=>{
-        show("finalMatch",[
-            "Semi Final 1 Winner 🆚 Semi Final 2 Winner"
-        ]);
+function generateGroupNext(id){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    let winners=["Winner 1","Winner 2","Winner 3","Winner 4"];
+    shuffle(winners);
+    const pairs=[
+        [winners[0],winners[2]],
+        [winners[1],winners[3]]
+    ];
+    pairs.forEach(p=>{
+        const li=document.createElement("li");
+        li.textContent=`${p[0]} 🆚 ${p[1]}`;
+        ul.appendChild(li);
     });
 }
 </script>
