@@ -5,252 +5,218 @@
 <title>Badminton Tournament Lottery</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{
+    min-height:100vh;
+    background-image:url("https://images.unsplash.com/photo-1599058917212-d750089bc07e");
+    background-size:cover;
+    background-position:center;
+}
+.overlay{
+    min-height:100vh;
+    background:rgba(0,0,0,0.75);
+    padding:20px;
+    text-align:center;
+    color:white;
+}
+h1{margin-bottom:10px}
+.team-inputs{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:8px;
+    max-width:800px;
+    margin:15px auto;
+}
+.team-inputs input{
+    padding:8px;border-radius:6px;border:none
+}
+button{
+    padding:12px 30px;
+    font-size:18px;
+    border-radius:8px;
+    border:none;
+    background:#ffcc00;
+    cursor:pointer;
+    margin:15px 0;
+}
+button:disabled{background:#aaa}
+.groups,.knockouts{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+.group,.knockout{
+    background:rgba(255,255,255,0.12);
+    width:260px;
+    padding:15px;
+    border-radius:12px;
+}
+.group h2,.knockout h2{
+    color:#ffcc00;
+    margin-bottom:8px;
+}
+ul{list-style:none}
+li{
+    padding:5px 0;
+    border-bottom:1px solid rgba(255,255,255,0.25);
 }
 
-body {
-    min-height: 100vh;
-    background-image: url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg");
-    background-size: cover;
-    background-position: center;
+/* Loader */
+.loader-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
 }
-
-.overlay {
-    min-height: 100vh;
-    background: rgba(0,0,0,0.75);
-    padding: 20px;
-    text-align: center;
-    color: white;
+.court{
+    width:80%;
+    height:120px;
+    border-top:3px solid #fff;
+    border-bottom:3px solid #fff;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:20px;
 }
-
-h1 { margin-bottom: 10px; }
-
-.team-inputs {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
-    gap: 8px;
-    max-width: 800px;
-    margin: 15px auto;
+.shuttle{
+    position:absolute;
+    font-size:48px;
+    top:30px;
+    animation:fly 1.2s linear infinite alternate;
 }
-
-.team-inputs input {
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
-}
-
-button {
-    padding: 12px 30px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    background: #ffcc00;
-    cursor: pointer;
-    margin: 15px 0;
-}
-
-button:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-}
-
-.groups {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.group {
-    background: rgba(255,255,255,0.12);
-    width: 260px;
-    padding: 15px;
-    border-radius: 12px;
-}
-
-.group h2 {
-    color: #ffcc00;
-    margin-bottom: 8px;
-}
-
-ul { list-style: none; }
-li {
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.25);
-}
-
-/* 🏸 LOADING SCREEN */
-.loader-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-
-.court {
-    width: 80%;
-    height: 120px;
-    border-top: 3px solid #fff;
-    border-bottom: 3px solid #fff;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-/* Shuttle */
-.shuttle {
-    position: absolute;
-    font-size: 48px;
-    top: 30px;
-    animation: fly 1.2s linear infinite alternate;
-}
-
-@keyframes fly {
-    0% {
-        left: 0%;
-        transform: rotate(-20deg);
-    }
-    100% {
-        left: 90%;
-        transform: rotate(20deg);
-    }
-}
-
-.loader-text {
-    font-size: 20px;
-    letter-spacing: 1px;
+@keyframes fly{
+    0%{left:0%;transform:rotate(-20deg)}
+    100%{left:90%;transform:rotate(20deg)}
 }
 </style>
 </head>
 
 <body>
-
 <div class="overlay">
-    <h1>🏸 Badminton Tournament Fixture Lottery 🏆</h1>
-    <p>Enter 24 Team Names</p>
+<h1>🏸 Badminton Tournament Fixture Lottery 🏆</h1>
+<p>Enter 24 Team Names</p>
 
-    <div class="team-inputs" id="teamInputs"></div>
+<div class="team-inputs" id="teamInputs"></div>
+<button id="drawBtn" onclick="startDraw()">Draw Groups</button>
 
-    <button id="drawBtn" onclick="startDraw()">Draw Groups</button>
-
-    <div class="groups">
-        <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
-        <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
-        <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
-    </div>
+<div class="groups">
+    <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
+    <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
+    <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
-<!-- 🏸 LOADER -->
+<h2 style="margin:25px 0;color:#ffcc00">🏆 Knockout Fixtures</h2>
+<div class="knockouts">
+    <div class="knockout"><h2>Group A</h2><ul id="koA"></ul></div>
+    <div class="knockout"><h2>Group B</h2><ul id="koB"></ul></div>
+    <div class="knockout"><h2>Group C</h2><ul id="koC"></ul></div>
+</div>
+</div>
+
+<!-- Loader -->
 <div class="loader-overlay" id="loader">
-    <div class="court">
-        <div class="shuttle">🏸</div>
-    </div>
-    <div class="loader-text">Drawing Groups...</div>
+    <div class="court"><div class="shuttle">🏸</div></div>
+    <div>Drawing Groups...</div>
 </div>
 
 <script>
-const teamInputsDiv = document.getElementById("teamInputs");
-const loader = document.getElementById("loader");
-const drawBtn = document.getElementById("drawBtn");
+const teamInputsDiv=document.getElementById("teamInputs");
+const loader=document.getElementById("loader");
+const drawBtn=document.getElementById("drawBtn");
 
-for (let i = 1; i <= 24; i++) {
-    const input = document.createElement("input");
-    input.placeholder = "Team " + i;
+for(let i=1;i<=24;i++){
+    const input=document.createElement("input");
+    input.placeholder="Team "+i;
     teamInputsDiv.appendChild(input);
 }
 
-function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
     }
 }
 
-function getPrefix(name) {
+function getPrefix(name){
     return name.trim().split(/\s+/).slice(0,2).join(" ").toLowerCase();
 }
 
-function startDraw() {
-    const inputs = document.querySelectorAll(".team-inputs input");
-    let teams = [];
+function startDraw(){
+    const inputs=document.querySelectorAll(".team-inputs input");
+    let teams=[];
+    inputs.forEach(i=>{if(i.value.trim())teams.push(i.value.trim())});
+    if(teams.length!==24){alert("Enter all 24 teams");return;}
 
-    inputs.forEach(i => {
-        if (i.value.trim()) teams.push(i.value.trim());
-    });
+    drawBtn.disabled=true;
+    loader.style.display="flex";
 
-    if (teams.length !== 24) {
-        alert("Please enter all 24 team names");
-        return;
-    }
-
-    drawBtn.disabled = true;
-    loader.style.display = "flex";
-
-    setTimeout(() => {
+    setTimeout(()=>{
         drawLottery(teams);
-        loader.style.display = "none";
-        drawBtn.disabled = false;
-    }, 6000);
+        loader.style.display="none";
+        drawBtn.disabled=false;
+    },6000);
 }
 
-function drawLottery(teams) {
+function drawLottery(teams){
     shuffle(teams);
+    let prefixMap={},groups={A:[],B:[],C:[]},order=["A","B","C"],idx=0;
 
-    let prefixMap = {};
-    teams.forEach(team => {
-        const key = getPrefix(team);
-        if (!prefixMap[key]) prefixMap[key] = [];
-        prefixMap[key].push(team);
+    teams.forEach(t=>{
+        const k=getPrefix(t);
+        if(!prefixMap[k])prefixMap[k]=[];
+        prefixMap[k].push(t);
     });
 
-    let groups = { A: [], B: [], C: [] };
-    let order = ["A","B","C"];
-    let idx = 0;
-
-    for (let list of Object.values(prefixMap)) {
+    for(let list of Object.values(prefixMap)){
         shuffle(list);
-        for (let team of list) {
-            let placed = false;
-            for (let i = 0; i < 3; i++) {
-                let g = order[(idx + i) % 3];
-                let count = groups[g].filter(t => getPrefix(t) === getPrefix(team)).length;
-                if (groups[g].length < 8 && count < 2) {
-                    groups[g].push(team);
-                    idx++;
-                    placed = true;
-                    break;
+        for(let t of list){
+            for(let i=0;i<3;i++){
+                let g=order[(idx+i)%3];
+                let cnt=groups[g].filter(x=>getPrefix(x)===getPrefix(t)).length;
+                if(groups[g].length<8 && cnt<2){
+                    groups[g].push(t);
+                    idx++;break;
                 }
-            }
-            if (!placed) {
-                alert("Grouping conflict. Please redraw.");
-                return;
             }
         }
     }
 
-    show("groupA", groups.A);
-    show("groupB", groups.B);
-    show("groupC", groups.C);
+    show("groupA",groups.A);
+    show("groupB",groups.B);
+    show("groupC",groups.C);
+
+    generateKnockouts(groups);
 }
 
-function show(id, list) {
-    const ul = document.getElementById(id);
-    ul.innerHTML = "";
-    list.forEach(t => {
-        const li = document.createElement("li");
-        li.textContent = t;
+function generateKnockouts(groups){
+    showKO("koA",groups.A);
+    showKO("koB",groups.B);
+    showKO("koC",groups.C);
+}
+
+function show(id,list){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    list.forEach(t=>{
+        const li=document.createElement("li");
+        li.textContent=t;
         ul.appendChild(li);
     });
 }
-</script>
 
+function showKO(id,list){
+    const ul=document.getElementById(id);
+    ul.innerHTML="";
+    if(list.length>=2){
+        const li=document.createElement("li");
+        li.textContent=list[0]+"  🆚  "+list[1];
+        ul.appendChild(li);
+    }
+}
+</script>
 </body>
 </html>
