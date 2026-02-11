@@ -2,181 +2,201 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tournament Generator</title>
+<title>Badminton Tournament Lottery</title>
+
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background:#111;
-        color:#fff;
-        text-align:center;
-    }
-    button{
-        padding:10px 18px;
-        margin:5px;
-        background:#ffb300;
-        border:none;
-        border-radius:6px;
-        font-weight:bold;
-        cursor:pointer;
-    }
-    .container{
-        display:flex;
-        justify-content:space-around;
-        flex-wrap:wrap;
-        margin-top:20px;
-    }
-    .box{
-        background:rgba(255,255,255,0.08);
-        padding:15px;
-        border-radius:10px;
-        width:280px;
-        margin:10px;
-    }
-    h3{
-        color:#ffb300;
-    }
-    ul{
-        list-style:none;
-        padding:0;
-    }
-    li{
-        margin:6px 0;
-    }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{
+    min-height:100vh;
+    background:url("794a8c7d610aa877b32aebdd32265d0e_1200x1200_crop_center.jpg") center/cover;
+}
+.overlay{
+    min-height:100vh;
+    background:rgba(0,0,0,0.78);
+    color:#fff;
+    padding:20px;
+    text-align:center;
+}
+h2{color:#ffcc00;margin:10px 0}
+.team-inputs{
+    max-width:900px;margin:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:8px;
+}
+.team-inputs input{padding:8px;border-radius:6px;border:none}
+button{
+    padding:12px 22px;
+    border:none;border-radius:8px;
+    background:#ffcc00;
+    margin:6px;cursor:pointer
+}
+button:disabled{background:#888}
+.groups,.matches{
+    display:flex;gap:20px;
+    justify-content:center;
+    flex-wrap:wrap;margin-top:15px
+}
+.group,.match-box{
+    width:260px;
+    background:rgba(255,255,255,.12);
+    padding:14px;border-radius:12px
+}
+ul{list-style:none}
+li{padding:6px;border-bottom:1px solid rgba(255,255,255,.25)}
+.loader{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.9);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:999
+}
+.shuttle{font-size:48px;animation:fly 1s infinite alternate}
+@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
 </style>
 </head>
+
 <body>
+<div class="overlay">
+<h1>🏸 Badminton Tournament Lottery</h1>
 
-<h2>🏸 Tournament Generator</h2>
+<div class="team-inputs" id="teamInputs"></div>
 
-<button onclick="drawGroups()">Draw Groups</button>
-<button onclick="groupRound()">Group Round Matches</button>
-<button onclick="nextRound()">Next Round</button>
-<button onclick="superSix()">Super Six</button>
+<button onclick="startDraw()">Draw Groups</button>
+<button id="matchBtn" onclick="generateGroupMatches()" disabled>Group Matches</button>
+<button id="nextBtn" onclick="generateNextRound()" disabled>Next Round</button>
+<button id="superBtn" onclick="generateSuperSix()" disabled>Super Six</button>
 
-<div class="container">
-    <div class="box"><h3>Group A</h3><ul id="groupA"></ul></div>
-    <div class="box"><h3>Group B</h3><ul id="groupB"></ul></div>
-    <div class="box"><h3>Group C</h3><ul id="groupC"></ul></div>
+<div class="groups">
+  <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
+  <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
+  <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
-<div class="container">
-    <div class="box"><h3>Group A – Group Round</h3><ul id="matchA"></ul></div>
-    <div class="box"><h3>Group B – Group Round</h3><ul id="matchB"></ul></div>
-    <div class="box"><h3>Group C – Group Round</h3><ul id="matchC"></ul></div>
+<h2>🏸 Group Round Matches</h2>
+<div class="matches">
+  <div class="match-box"><h2>A</h2><ul id="matchA"></ul></div>
+  <div class="match-box"><h2>B</h2><ul id="matchB"></ul></div>
+  <div class="match-box"><h2>C</h2><ul id="matchC"></ul></div>
 </div>
 
-<div class="container">
-    <div class="box"><h3>Group A – Next Round</h3><ul id="nextA"></ul></div>
-    <div class="box"><h3>Group B – Next Round</h3><ul id="nextB"></ul></div>
-    <div class="box"><h3>Group C – Next Round</h3><ul id="nextC"></ul></div>
+<h2>🏆 Next Round Fixtures</h2>
+<div class="matches">
+  <div class="match-box"><h2>A</h2><ul id="nextA"></ul></div>
+  <div class="match-box"><h2>B</h2><ul id="nextB"></ul></div>
+  <div class="match-box"><h2>C</h2><ul id="nextC"></ul></div>
 </div>
 
-<div class="container">
-    <div class="box"><h3>🔥 Group E (Super Six)</h3><ul id="groupE"></ul></div>
-    <div class="box"><h3>🔥 Group F (Super Six)</h3><ul id="groupF"></ul></div>
+<h2>🔥 Super Six</h2>
+<div class="matches">
+  <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
+  <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
+</div>
+</div>
+
+<div class="loader" id="loader">
+  <div class="shuttle">🏸</div>
+  <p id="loaderText">Processing...</p>
 </div>
 
 <script>
-/* ================== DATA ================== */
-const teams = [
- "Bbbb","Dddd","KV1","BD4","Mmmm","BD1","Eeee","Hhhh","KV3","Nnnn",
- "BD2","Ffff","BD3","Jjjj","Oooo","GS1","GS2","Iiii","Kkkkk","Cccc"
-];
+const teamInputs=document.getElementById("teamInputs");
+const loader=document.getElementById("loader");
+const loaderText=document.getElementById("loaderText");
+const matchBtn=document.getElementById("matchBtn");
+const nextBtn=document.getElementById("nextBtn");
+const superBtn=document.getElementById("superBtn");
 
-let groups = {A:[], B:[], C:[]};
-let groupRoundWinners = {A:[], B:[], C:[]};
-let nextRoundMatches = {A:[], B:[], C:[]};
+let finalGroups={A:[],B:[],C:[]};
+let nextRoundTeams={A:[],B:[],C:[]};
 
-/* ================== UTIL ================== */
-function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
+for(let i=1;i<=24;i++){
+  let input=document.createElement("input");
+  input.placeholder="Team "+i;
+  teamInputs.appendChild(input);
 }
 
-/* ================== 1️⃣ GROUP DRAW ================== */
-function drawGroups(){
-    let temp=[...teams];
-    shuffle(temp);
-
-    groups.A = temp.slice(0,8);
-    groups.B = temp.slice(8,16);
-    groups.C = temp.slice(16,24);
-
-    show("groupA", groups.A);
-    show("groupB", groups.B);
-    show("groupC", groups.C);
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
 }
 
-/* ================== 2️⃣ GROUP ROUND ================== */
-function groupRound(){
-    createGroupRound("A", groups.A, "matchA");
-    createGroupRound("B", groups.B, "matchB");
-    createGroupRound("C", groups.C, "matchC");
+function showLoader(t,cb){
+  loaderText.textContent=t;
+  loader.style.display="flex";
+  setTimeout(()=>{loader.style.display="none";cb();},1500);
 }
 
-function createGroupRound(group, teams, ulId){
-    let temp=[...teams];
-    shuffle(temp);
-
-    const ul=document.getElementById(ulId);
-    ul.innerHTML="";
-    groupRoundWinners[group]=[];
-
-    for(let i=0;i<8;i+=2){
-        const t1=temp[i];
-        const t2=temp[i+1];
-        ul.innerHTML+=`<li>${t1} 🆚 ${t2}</li>`;
-
-        const winner=Math.random()>0.5?t1:t2;
-        groupRoundWinners[group].push(winner);
-    }
+function startDraw(){
+  let teams=[];
+  document.querySelectorAll("input").forEach(i=>i.value&&teams.push(i.value));
+  if(teams.length!==24){alert("Enter 24 teams");return;}
+  showLoader("Drawing Groups...",()=>{
+    shuffle(teams);
+    finalGroups={A:[],B:[],C:[]};
+    teams.forEach((t,i)=>finalGroups[i%3===0?"A":i%3===1?"B":"C"].push(t));
+    showGroup("groupA",finalGroups.A);
+    showGroup("groupB",finalGroups.B);
+    showGroup("groupC",finalGroups.C);
+    matchBtn.disabled=false;
+  });
 }
 
-/* ================== 3️⃣ NEXT ROUND (FIXED) ================== */
-function nextRound(){
-    ["A","B","C"].forEach(group=>{
-        let w=[...groupRoundWinners[group]];
-        shuffle(w);
-
-        const m1=[w[0],w[2]];
-        const m2=[w[1],w[3]];
-
-        nextRoundMatches[group]=[m1,m2];
-
-        const ul=document.getElementById("next"+group);
-        ul.innerHTML=`
-            <li>${m1[0]} 🆚 ${m1[1]}</li>
-            <li>${m2[0]} 🆚 ${m2[1]}</li>
-        `;
-    });
+function showGroup(id,list){
+  let ul=document.getElementById(id); ul.innerHTML="";
+  list.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
 }
 
-/* ================== 4️⃣ SUPER SIX ================== */
-function superSix(){
-    let six=[];
+function generateGroupMatches(){
+  showLoader("Group Matches...",()=>{
+    makeMatches("matchA",finalGroups.A);
+    makeMatches("matchB",finalGroups.B);
+    makeMatches("matchC",finalGroups.C);
+    nextBtn.disabled=false;
+  });
+}
 
-    ["A","B","C"].forEach(group=>{
-        nextRoundMatches[group].forEach(match=>{
-            const winner=Math.random()>0.5?match[0]:match[1];
-            six.push(winner);
-        });
-    });
+function makeMatches(id,list){
+  let t=[...list]; shuffle(t);
+  let ul=document.getElementById(id); ul.innerHTML="";
+  for(let i=0;i<t.length;i+=2)
+    ul.innerHTML+=`<li>${t[i]} 🆚 ${t[i+1]}</li>`;
+}
 
+function generateNextRound(){
+  showLoader("Next Round...",()=>{
+    createNext("nextA","A");
+    createNext("nextB","B");
+    createNext("nextC","C");
+    superBtn.disabled=false;
+  });
+}
+
+function createNext(id,g){
+  let t=[...finalGroups[g]]; shuffle(t);
+  nextRoundTeams[g]=[t[0],t[1]];   // ONLY FIRST MATCH
+  let ul=document.getElementById(id);
+  ul.innerHTML=`
+    <li>${t[0]} 🆚 ${t[1]}</li>
+    <li>${t[2]} 🆚 ${t[3]}</li>`;
+}
+
+function generateSuperSix(){
+  showLoader("Super Six...",()=>{
+    let six=[
+      ...nextRoundTeams.A,
+      ...nextRoundTeams.B,
+      ...nextRoundTeams.C
+    ];
     shuffle(six);
-
-    show("groupE", six.slice(0,3));
-    show("groupF", six.slice(3,6));
-}
-
-/* ================== DISPLAY ================== */
-function show(id,arr){
-    const ul=document.getElementById(id);
-    ul.innerHTML="";
-    arr.forEach(t=>ul.innerHTML+=`<li>${t}</li>`);
+    showGroup("groupE",six.slice(0,3));
+    showGroup("groupF",six.slice(3,6));
+  });
 }
 </script>
-
 </body>
 </html>
