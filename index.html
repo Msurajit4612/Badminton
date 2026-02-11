@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Badminton Tournament Lottery</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{
@@ -93,6 +94,7 @@ li{
 }
 </style>
 </head>
+
 <body>
 
 <div class="overlay">
@@ -105,16 +107,18 @@ li{
 <button id="matchBtn" onclick="generateGroupMatches()" disabled>
     Generate Group Matches
 </button>
-<button id="nextRoundBtn" onclick="generateNextRound()" disabled>
-    Generate Next Round
+<button id="superSixBtn" onclick="generateSuperSix()" disabled>
+    Generate Super Six
 </button>
 
+<!-- Groups -->
 <div class="groups">
     <div class="group"><h2>Group A</h2><ul id="groupA"></ul></div>
     <div class="group"><h2>Group B</h2><ul id="groupB"></ul></div>
     <div class="group"><h2>Group C</h2><ul id="groupC"></ul></div>
 </div>
 
+<!-- Group Matches -->
 <h2>🏸 Group Match Fixtures</h2>
 <div class="matches">
     <div class="match-box"><h2>Group A</h2><ul id="matchA"></ul></div>
@@ -122,12 +126,13 @@ li{
     <div class="match-box"><h2>Group C</h2><ul id="matchC"></ul></div>
 </div>
 
-<h2>🏆 Next Round Fixtures</h2>
+<!-- Super Six -->
+<h2>🔥 Super Six</h2>
 <div class="matches">
-    <div class="match-box"><h2>Group A</h2><ul id="nextA"></ul></div>
-    <div class="match-box"><h2>Group B</h2><ul id="nextB"></ul></div>
-    <div class="match-box"><h2>Group C</h2><ul id="nextC"></ul></div>
+    <div class="match-box"><h2>Group E</h2><ul id="groupE"></ul></div>
+    <div class="match-box"><h2>Group F</h2><ul id="groupF"></ul></div>
 </div>
+
 </div>
 
 <!-- Loader -->
@@ -143,9 +148,9 @@ const teamInputs=document.getElementById("teamInputs");
 const loader=document.getElementById("loader");
 const loaderText=document.getElementById("loaderText");
 const matchBtn=document.getElementById("matchBtn");
-const nextRoundBtn=document.getElementById("nextRoundBtn");
+const superSixBtn=document.getElementById("superSixBtn");
 
-/* Inputs */
+/* Create Inputs */
 for(let i=1;i<=24;i++){
     const input=document.createElement("input");
     input.placeholder="Team "+i;
@@ -160,7 +165,7 @@ function shuffle(arr){
     }
 }
 
-/* Global loader */
+/* Loader */
 function showLoader(text, callback){
     loaderText.textContent=text;
     loader.style.display="flex";
@@ -170,7 +175,7 @@ function showLoader(text, callback){
     },3000);
 }
 
-/* Draw groups */
+/* Draw Groups */
 function startDraw(){
     const inputs=document.querySelectorAll(".team-inputs input");
     let teams=[];
@@ -210,13 +215,13 @@ function showGroup(id,list){
     });
 }
 
-/* Group matches */
+/* Group Matches */
 function generateGroupMatches(){
     showLoader("Generating Group Matches...",()=>{
         createMatches("matchA",finalGroups.A);
         createMatches("matchB",finalGroups.B);
         createMatches("matchC",finalGroups.C);
-        nextRoundBtn.disabled=false;
+        superSixBtn.disabled=false;
     });
 }
 
@@ -232,29 +237,34 @@ function createMatches(id,list){
     }
 }
 
-/* Next round */
-function generateNextRound(){
-    showLoader("Generating Next Round...",()=>{
-        generateGroupNext("nextA");
-        generateGroupNext("nextB");
-        generateGroupNext("nextC");
+/* SUPER SIX LOGIC */
+function generateSuperSix(){
+    showLoader("Generating Super Six...",()=>{
+
+        let qualified = [];
+
+        qualified.push(randomMatchWinner(finalGroups.A));
+        qualified.push(randomMatchWinner(finalGroups.A));
+
+        qualified.push(randomMatchWinner(finalGroups.B));
+        qualified.push(randomMatchWinner(finalGroups.B));
+
+        qualified.push(randomMatchWinner(finalGroups.C));
+        qualified.push(randomMatchWinner(finalGroups.C));
+
+        shuffle(qualified);
+
+        showGroup("groupE", qualified.slice(0,3));
+        showGroup("groupF", qualified.slice(3,6));
     });
 }
 
-function generateGroupNext(id){
-    const ul=document.getElementById(id);
-    ul.innerHTML="";
-    let winners=["Winner 1","Winner 2","Winner 3","Winner 4"];
-    shuffle(winners);
-    const pairs=[
-        [winners[0],winners[2]],
-        [winners[1],winners[3]]
-    ];
-    pairs.forEach(p=>{
-        const li=document.createElement("li");
-        li.textContent=`${p[0]} 🆚 ${p[1]}`;
-        ul.appendChild(li);
-    });
+function randomMatchWinner(group){
+    let temp=[...group];
+    shuffle(temp);
+    const t1=temp.pop();
+    const t2=temp.pop();
+    return Math.random()>0.5?t1:t2;
 }
 </script>
 
